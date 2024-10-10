@@ -53,8 +53,12 @@ set(IMGUI_SRC
 add_executable(custom_game_engine
         src/main.cpp
         ${IMGUI_SRC}
+        src/game.cpp
+        src/game.hpp
+        src/engine.cpp
+        src/engine.hpp
 )
-target_link_libraries(custom_game_engine SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer lua_static sol2::sol2)
+target_link_libraries(custom_game_engine SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer lua_static sol2::sol2 glm::glm)
 target_include_directories(custom_game_engine PRIVATE libs/imgui-1913 libs/imgui-1913/backends)
 
 if(WIN32)
