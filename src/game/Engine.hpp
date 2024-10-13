@@ -4,7 +4,7 @@
 
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
-#include "Game.hpp"
+#include "game/Game.hpp"
 
 namespace engine {
 

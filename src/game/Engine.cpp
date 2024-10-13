@@ -2,10 +2,11 @@
 // Created by HP on 10.10.2024.
 //
 
-#include "Engine.hpp"
+#include "game/Engine.hpp"
+#include <SDL.h>
 #include <format>
-#include <iostream>
-#include "SDL.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
 namespace engine {
     Engine::Engine() {
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -13,10 +14,7 @@ namespace engine {
         }
     }
 
-    Engine::~Engine() {
-        std::cout << "destroying SDL\n";
-        SDL_Quit();
-    }
+    Engine::~Engine() { SDL_Quit(); }
 
     Engine const &Engine::instance() {
         static Engine eng = Engine{};
@@ -46,6 +44,8 @@ namespace engine {
             throw std::runtime_error(std::format("could not set window to fullscreen video mode: {}", SDL_GetError()));
         }
 
-        return Game{window, renderer};
+        auto logger = spdlog::stdout_color_mt("console", spdlog::color_mode::automatic);
+
+        return Game{window, renderer, logger};
     }
 } // namespace engine

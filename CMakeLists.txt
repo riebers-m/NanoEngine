@@ -32,10 +32,15 @@ CPMAddPackage(
         VERSION 3.3.0
 )
 
+CPMAddPackage(
+        NAME spdlog
+        GITHUB_REPOSITORY gabime/spdlog
+        VERSION 1.14.1
+)
 
 set(IMGUI_SRC
-    libs/imgui-1913/imconfig.h
-    libs/imgui-1913/imgui.cpp
+        libs/imgui-1913/imconfig.h
+        libs/imgui-1913/imgui.cpp
         libs/imgui-1913/imgui_demo.cpp
         libs/imgui-1913/imgui_draw.cpp
         libs/imgui-1913/imgui_internal.h
@@ -48,20 +53,30 @@ set(IMGUI_SRC
         libs/imgui-1913/backends/imgui_impl_sdl2.cpp
         libs/imgui-1913/backends/imgui_impl_sdlrenderer2.h
         libs/imgui-1913/backends/imgui_impl_sdlrenderer2.cpp
+
 )
 
 add_executable(custom_game_engine
         src/main.cpp
         ${IMGUI_SRC}
-        src/game.cpp
-        src/game.hpp
-        src/engine.cpp
-        src/engine.hpp
+        src/game/Game.cpp
+        src/game/Game.hpp
+        src/game/Engine.cpp
+        src/game/Engine.hpp
+        src/const/Const.hpp
+        src/timer/Timer.cpp
+        src/timer/Timer.hpp
 )
-target_link_libraries(custom_game_engine SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer lua_static sol2::sol2 glm::glm)
-target_include_directories(custom_game_engine PRIVATE libs/imgui-1913 libs/imgui-1913/backends)
+target_link_libraries(custom_game_engine
+        SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer
+        lua_static
+        sol2::sol2
+        glm::glm
+        spdlog::spdlog_header_only
+)
+target_include_directories(custom_game_engine PRIVATE libs/imgui-1913 libs/imgui-1913/backends src)
 
-if(WIN32)
+if (WIN32)
     # Copy SDL2
     add_custom_command(TARGET custom_game_engine POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
