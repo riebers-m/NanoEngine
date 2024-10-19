@@ -6,6 +6,8 @@
 #define GAME_HPP
 #include <memory>
 #include <spdlog/spdlog.h>
+
+#include "ECS/ECS.hpp"
 #include "timer/Timer.hpp"
 
 class SDL_Window;
@@ -22,6 +24,7 @@ namespace engine {
         bool m_is_running;
         Timer m_timer;
         std::shared_ptr<spdlog::logger> m_logger;
+        ecs::Registry m_registry;
 
         void process_input();
         void update(float dt) const;

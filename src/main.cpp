@@ -1,6 +1,4 @@
 #include <iostream>
-
-
 #include "game/Engine.hpp"
 
 int main(int argc, char *argv[]) {

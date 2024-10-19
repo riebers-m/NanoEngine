@@ -66,6 +66,11 @@ add_executable(custom_game_engine
         src/const/Const.hpp
         src/timer/Timer.cpp
         src/timer/Timer.hpp
+        src/components/Transform.hpp
+        src/systems/Movement.hpp
+        src/ECS/ECS.hpp
+        src/ECS/ECS.cpp
+        src/components/RigidBody.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

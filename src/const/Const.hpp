@@ -21,6 +21,7 @@ namespace engine {
     std::chrono::milliseconds constexpr MILL_SEC_PER_FRAME =
             std::chrono::milliseconds(std::chrono::milliseconds(1000) / FPS);
 
+    std::size_t constexpr MAX_COMPONENTS = 32;
 } // namespace engine
 
 #endif // CONST_HPP

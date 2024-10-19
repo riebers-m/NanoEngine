@@ -45,7 +45,7 @@ namespace engine {
         }
 
         auto logger = spdlog::stdout_color_mt("console", spdlog::color_mode::automatic);
-
+        logger->set_level(spdlog::level::debug);
         return Game{window, renderer, logger};
     }
 } // namespace engine
