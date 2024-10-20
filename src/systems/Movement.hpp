@@ -4,13 +4,19 @@
 
 #ifndef MOVEMENT_HPP
 #define MOVEMENT_HPP
+#include "ECS/ECS.hpp"
 
-namespace system {
-    class Movement : public System {
+namespace systems {
+    class Movement : public ecs::System {
+        using Logger = std::shared_ptr<spdlog::logger>;
+
+    private:
+        Logger m_logger;
+
     public:
-        Movement() = default;
+        explicit Movement(Logger);
 
-        void update();
+        void update(float dt);
     };
-} // namespace system
+} // namespace systems
 #endif // MOVEMENT_HPP

@@ -71,6 +71,10 @@ add_executable(custom_game_engine
         src/ECS/ECS.hpp
         src/ECS/ECS.cpp
         src/components/RigidBody.hpp
+        src/systems/Movement.cpp
+        src/systems/Render.cpp
+        src/systems/Render.hpp
+        src/components/Sprite.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

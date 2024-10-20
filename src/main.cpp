@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
         game.run();
         return 0;
 
-    } catch (std::runtime_error const &e) {
+    } catch (std::exception const &e) {
         std::cout << e.what();
         return 1;
     }

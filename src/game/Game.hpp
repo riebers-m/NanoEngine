@@ -27,7 +27,7 @@ namespace engine {
         ecs::Registry m_registry;
 
         void process_input();
-        void update(float dt) const;
+        void update(float dt);
         void render() const;
         void setup();
 

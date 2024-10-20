@@ -9,8 +9,6 @@
 #include <typeindex>
 #include <unordered_map>
 
-
-#include "components/RigidBody.hpp"
 #include "const/Const.hpp"
 #include "spdlog/logger.h"
 
@@ -18,7 +16,9 @@ namespace spdlog {
     class logger;
 }
 namespace ecs {
-
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    /// Entity
+    ///////////////////////////////////////////////////////////////////////////////////////////
     class Entity {
     private:
         std::size_t m_id;
@@ -173,11 +173,9 @@ namespace ecs {
         template<typename T>
         void remove_system();
         template<typename T>
-        bool has_system() const;
+        [[nodiscard]] bool has_system() const;
         template<typename T>
         T &get_system() const;
-
-
         void add_entity_to_system(Entity const &entity);
 
         void update();
@@ -276,7 +274,7 @@ namespace ecs {
 
         if (!m_components[component_id]) {
             m_components[component_id] = std::make_shared<Pool<T>>();
-            m_logger->debug("adding component {} with id {}", typeid(T).name(), component_id);
+            m_logger->debug("adding component pool {} with id {}", typeid(T).name(), component_id);
         }
 
         auto component_pool = std::static_pointer_cast<Pool<T>>(m_components[component_id]);
@@ -324,7 +322,7 @@ namespace ecs {
             throw std::out_of_range(std::format("invalid component id {} >= {} for {}", component_id,
                                                 m_components.size(), typeid(T).name()));
         }
-        auto component = std::static_pointer_cast<T>(m_components[component_id]);
+        auto component = std::static_pointer_cast<Pool<T>>(m_components[component_id]);
 
         return component->get(entity_id);
     }
@@ -332,7 +330,7 @@ namespace ecs {
 
     template<typename T, typename... TArgs>
     void Registry::add_system(TArgs &&...args) {
-        auto new_system = std::make_shared<T>(std::forward<T>(args)...);
+        auto new_system = std::make_shared<T>(std::forward<TArgs>(args)...);
         auto const [pos, ok] = m_systems.insert(std::make_pair(std::type_index(typeid(T)), new_system));
         if (!ok) {
             throw std::runtime_error(std::format("inserting system {} failed", typeid(T).name()));
