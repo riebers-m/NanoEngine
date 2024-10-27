@@ -55,9 +55,7 @@ namespace engine {
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
-        // TODO:
-        // Load the tilemap png
-        // Load tilemap map
+
         TileMapLoader loader{m_logger};
         loader.load_index_map(engine::JUNGLE_INDEX_MAP);
 

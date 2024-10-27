@@ -18,7 +18,6 @@ systems::RenderSystem::RenderSystem(Logger logger) : m_logger{logger} {
 
 void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore const *asset_store) const {
     try {
-        // TODO: Sort all entities by z index
         struct RenderableEntity {
             component::Transform transform;
             component::Sprite sprite;
