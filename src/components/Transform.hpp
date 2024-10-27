@@ -11,6 +11,9 @@ namespace component {
         glm::vec2 position;
         glm::vec2 scale;
         degree rotation; // angle
+
+        Transform(glm::vec2 const &position = {0, 0}, glm::vec2 const scale = {1.0, 1.0}, degree rotation = 0) :
+            position{position}, scale{scale}, rotation{rotation} {}
     };
 } // namespace component
 

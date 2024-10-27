@@ -9,6 +9,7 @@
 
 #include "ECS/ECS.hpp"
 #include "assetStore/AssetStore.hpp"
+#include "common/TileMapLoader.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
@@ -43,24 +44,56 @@ namespace engine {
 
     void Game::setup() {
         m_logger->info("ms per frame: {}", engine::MILL_SEC_PER_FRAME.count());
+        load_level(1);
 
+        m_timer.start();
+    }
+    void Game::load_level(std::size_t level) {
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
+        m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
+        // TODO:
+        // Load the tilemap png
+        // Load tilemap map
+        TileMapLoader loader{m_logger};
+        loader.load_index_map(engine::JUNGLE_INDEX_MAP);
 
+        auto row = 0;
+        auto col = 0;
+        auto const scale = 2.0;
+
+        for (auto const &index_row: loader) {
+            col = 0;
+            for (auto const map_index: index_row) {
+                auto tile = m_registry->create_entity();
+                tile.add_component<component::Transform>(
+                        glm::vec2{engine::TILE_SIZE * col * scale, engine::TILE_SIZE * row * scale},
+                        glm::vec2{scale, scale});
+                auto const src_X = map_index % engine::JUNGLE_MAP_COLS;
+                auto const src_Y = map_index / engine::JUNGLE_MAP_COLS;
+
+                if (src_Y >= engine::JUNGLE_MAP_ROWS) {
+                    throw std::runtime_error(
+                            std::format("invalid y index ({}) for tile with index {}", src_Y, map_index));
+                }
+                tile.add_component<component::Sprite>("tilemap", engine::TILE_SIZE, engine::TILE_SIZE, 0,
+                                                      engine::TILE_SIZE * src_X, engine::TILE_SIZE * src_Y);
+                ++col;
+            }
+            ++row;
+        }
         auto tank = m_registry->create_entity();
-        tank.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{3.0, 3.0}, 45.0);
-        tank.add_component<component::RigidBody>(glm::vec2{40.0, 0.0});
-        tank.add_component<component::Sprite>("tank-image", 32, 32);
+        tank.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        tank.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
+        tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
 
         auto truck = m_registry->create_entity();
-        truck.add_component<component::Transform>(glm::vec2{50.0, 100.0}, glm::vec2{1.0, 1.0}, 0.0);
-        truck.add_component<component::RigidBody>(glm::vec2{0.0, 50.0});
-        truck.add_component<component::Sprite>("truck-image", 32, 32);
-
-        m_timer.start();
+        truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        truck.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
+        truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
     }
 
     float Game::variable_time() {

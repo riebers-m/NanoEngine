@@ -43,6 +43,8 @@ namespace ecs {
         bool has_component() const;
         template<typename T>
         T &get_component();
+        template<typename T>
+        T &get_component() const;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +200,11 @@ namespace ecs {
     }
     template<typename T>
     T &Entity::get_component() {
+        return m_registry->get_component<T>(*this);
+    }
+
+    template<typename T>
+    T &Entity::get_component() const {
         return m_registry->get_component<T>(*this);
     }
     ///////////////////////////////////////////////////////////////////////////////////////////
