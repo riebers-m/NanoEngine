@@ -6,14 +6,16 @@
 #define GAME_HPP
 #include <memory>
 #include <spdlog/spdlog.h>
-
-#include "ECS/ECS.hpp"
 #include "timer/Timer.hpp"
 
-class SDL_Window;
-class SDL_Renderer;
+namespace ecs {
+    class Registry;
+}
+struct SDL_Window;
+struct SDL_Renderer;
 
 namespace engine {
+    class AssetStore;
 
     class Game {
         using logger = std::shared_ptr<spdlog::logger>;
@@ -24,7 +26,8 @@ namespace engine {
         bool m_is_running;
         Timer m_timer;
         std::shared_ptr<spdlog::logger> m_logger;
-        ecs::Registry m_registry;
+        std::unique_ptr<ecs::Registry> m_registry;
+        std::unique_ptr<AssetStore> m_asset_store;
 
         void process_input();
         void update(float dt);
@@ -36,7 +39,8 @@ namespace engine {
 
     public:
         explicit Game(SDL_Window *window, SDL_Renderer *renderer, logger logger);
-
+        ~Game(); // needs to be defined otherwise compiler tries to generate it and does not know at this point how to
+                 // destroy forward declared registry
         void run();
     };
 

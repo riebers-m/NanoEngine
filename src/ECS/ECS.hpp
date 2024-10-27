@@ -76,7 +76,7 @@ namespace ecs {
     template<typename T>
     struct is_simple_struct {
         // Check if T is a simple struct type
-        static constexpr bool value = std::is_class_v<T> && std::is_aggregate_v<T> && !std::is_polymorphic_v<T>;
+        static constexpr bool value = std::is_class_v<T> && !std::is_polymorphic_v<T>;
     };
 
     struct BaseComponent {

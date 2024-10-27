@@ -6,7 +6,10 @@
 #define RENDERSYSTEM_HPP
 #include "ECS/ECS.hpp"
 
-class SDL_Renderer;
+namespace engine {
+    class AssetStore;
+}
+struct SDL_Renderer;
 
 namespace systems {
     class RenderSystem : public ecs::System {
@@ -17,7 +20,7 @@ namespace systems {
 
     public:
         explicit RenderSystem(Logger);
-        void update(SDL_Renderer *) const;
+        void update(SDL_Renderer *, engine::AssetStore const *asset_store) const;
     };
 } // namespace systems
 

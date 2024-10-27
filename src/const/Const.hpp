@@ -5,17 +5,19 @@
 #ifndef CONST_HPP
 #define CONST_HPP
 #include <chrono>
+#include <filesystem>
 #include <string>
 
 namespace engine {
 #ifdef _DEBUG
-    std::string const ASSET_PATH = "C:/Users/HP/dev/custom_game_engine/assets";
+    std::filesystem::path const ASSET_PATH = "C:/Users/HP/dev/custom_game_engine/assets";
 #elif
     std::string const ASSET_PATH = "./assets";
 #endif
 
-    std::string const IMAGES_PATH = ASSET_PATH + "/images";
-    std::string const TANK_RIGHT = IMAGES_PATH + "/tank-tiger-right.png";
+    std::filesystem::path const IMAGES_PATH = ASSET_PATH / "images";
+    std::filesystem::path const TANK_RIGHT = IMAGES_PATH / "tank-tiger-right.png";
+    std::filesystem::path const TRUCK_RIGHT = IMAGES_PATH / "truck-ford-right.png";
 
     std::chrono::milliseconds constexpr FPS = std::chrono::milliseconds(60);
     std::chrono::milliseconds constexpr MILL_SEC_PER_FRAME =

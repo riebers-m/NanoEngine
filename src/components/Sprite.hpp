@@ -4,12 +4,22 @@
 
 #ifndef SPRITE_HPP
 #define SPRITE_HPP
-#include "glm/vec2.hpp"
-
+#include <SDL.h>
+#include <string>
+#include <utility>
 namespace component {
     struct Sprite {
+        std::string asset_id;
         int width{};
         int height{};
+        SDL_Rect src_rect{};
+
+        // default values for all arguments are needed because you cant default construct this class anymore (needed in
+        // the registry.add_component function)
+        explicit Sprite(std::string asset_id_ = "", int width_ = 0, int height_ = 0, int src_rect_x_ = 0,
+                        int src_rect_y_ = 0) :
+            asset_id(std::move(asset_id_)), width(width_), height(height_),
+            src_rect{src_rect_x_, src_rect_y_, width_, height_} {}
     };
 } // namespace component
 #endif // SPRITE_HPP

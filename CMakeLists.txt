@@ -59,10 +59,6 @@ set(IMGUI_SRC
 add_executable(custom_game_engine
         src/main.cpp
         ${IMGUI_SRC}
-        src/game/Game.cpp
-        src/game/Game.hpp
-        src/game/Engine.cpp
-        src/game/Engine.hpp
         src/const/Const.hpp
         src/timer/Timer.cpp
         src/timer/Timer.hpp
@@ -75,6 +71,12 @@ add_executable(custom_game_engine
         src/systems/Render.cpp
         src/systems/Render.hpp
         src/components/Sprite.hpp
+        src/assetStore/AssetStore.cpp
+        src/assetStore/AssetStore.hpp
+        src/game/Game.cpp
+        src/game/Game.hpp
+        src/game/Engine.cpp
+        src/game/Engine.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

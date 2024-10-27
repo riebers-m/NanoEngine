@@ -6,10 +6,11 @@
 #define TRANSFORM_HPP
 #include <glm/glm.hpp>
 namespace component {
+    using degree = double;
     struct Transform {
         glm::vec2 position;
         glm::vec2 scale;
-        double rotation; // angle
+        degree rotation; // angle
     };
 } // namespace component
 
