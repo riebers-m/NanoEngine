@@ -12,15 +12,15 @@ namespace engine {
     public:
         Timer() = default;
 
-        std::chrono::milliseconds time_passed();
+        [[nodiscard]] std::chrono::milliseconds time_passed() const;
         void start();
         void stop();
-        std::chrono::milliseconds round();
-        bool has_passed(std::chrono::milliseconds const &delta);
+        [[nodiscard]] std::chrono::milliseconds round() const;
+        bool has_passed(std::chrono::milliseconds const &delta) const;
 
     private:
-        std::chrono::system_clock::time_point m_start_time;
-        std::chrono::system_clock::time_point m_stop_time;
+        std::chrono::high_resolution_clock::time_point m_start_time;
+        std::chrono::high_resolution_clock::time_point m_stop_time;
     };
 
 } // namespace engine

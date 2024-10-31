@@ -18,7 +18,7 @@ namespace engine {
     class AssetStore;
 
     class Game {
-        using logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<spdlog::logger>;
 
     private:
         std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> m_window;
@@ -28,6 +28,8 @@ namespace engine {
         std::shared_ptr<spdlog::logger> m_logger;
         std::unique_ptr<ecs::Registry> m_registry;
         std::unique_ptr<AssetStore> m_asset_store;
+        uint16_t m_window_width;
+        uint16_t m_window_height;
 
         void process_input();
         void update(float dt);
@@ -39,7 +41,8 @@ namespace engine {
         float fixed_time(); // pixels per frame
 
     public:
-        explicit Game(SDL_Window *window, SDL_Renderer *renderer, logger logger);
+        explicit Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, uint16_t window_width,
+                      uint16_t window_height);
         ~Game(); // needs to be defined otherwise compiler tries to generate it and does not know at this point how to
                  // destroy forward declared registry
         void run();

@@ -20,6 +20,9 @@ namespace engine {
     std::filesystem::path const TANK_RIGHT = IMAGES_PATH / "tank-tiger-right.png";
     std::filesystem::path const TRUCK_RIGHT = IMAGES_PATH / "truck-ford-right.png";
     std::filesystem::path const JUNGLE_MAP = TILEMAPS_PATH / "jungle.png";
+    std::filesystem::path const CHOPPER = IMAGES_PATH / "chopper.png";
+    std::filesystem::path const RADAR = IMAGES_PATH / "radar.png";
+
     std::filesystem::path const JUNGLE_INDEX_MAP = TILEMAPS_PATH / "jungle.map";
 
     std::chrono::milliseconds constexpr FPS = std::chrono::milliseconds(60);

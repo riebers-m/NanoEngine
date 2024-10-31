@@ -10,18 +10,21 @@
 #include "ECS/ECS.hpp"
 #include "assetStore/AssetStore.hpp"
 #include "common/TileMapLoader.hpp"
+#include "components/Animation.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 #include "const/Const.hpp"
+#include "systems/Animation.hpp"
 #include "systems/Movement.hpp"
 #include "systems/Render.hpp"
 
 namespace engine {
-    Game::Game(SDL_Window *window, SDL_Renderer *renderer, logger logger) :
+    Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, uint16_t window_width,
+               uint16_t window_height) :
         m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }),
         m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }), m_is_running(true), m_timer{},
-        m_logger(logger) {
+        m_logger(logger), m_window_width{window_width}, m_window_height{window_width} {
 
         m_registry = std::make_unique<ecs::Registry>(logger);
         m_asset_store = std::make_unique<AssetStore>(logger);
@@ -51,10 +54,13 @@ namespace engine {
     void Game::load_level(std::size_t level) {
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
+        m_registry->add_system<systems::Animation>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
+        m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER);
+        m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
 
         TileMapLoader loader{m_logger};
         loader.load_index_map(engine::JUNGLE_INDEX_MAP);
@@ -83,15 +89,28 @@ namespace engine {
             }
             ++row;
         }
-        auto tank = m_registry->create_entity();
-        tank.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        tank.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
-        tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
 
-        auto truck = m_registry->create_entity();
-        truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        truck.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
-        truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
+        auto chopper = m_registry->create_entity();
+        chopper.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
+        chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
+        chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
+
+        auto radar = m_registry->create_entity();
+        radar.add_component<component::Transform>(glm::vec2{m_window_width - 74, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        radar.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
+        radar.add_component<component::Sprite>("radar-image", 64, 64, 2);
+        radar.add_component<component::Animation>(8, 10, component::animate::infinite);
+
+        // auto tank = m_registry->create_entity();
+        // tank.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        // tank.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
+        // tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
+        //
+        // auto truck = m_registry->create_entity();
+        // truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        // truck.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
+        // truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
     }
 
     float Game::variable_time() {
@@ -134,6 +153,7 @@ namespace engine {
     void Game::update(float dt) {
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt);
+        m_registry->get_system<systems::Animation>().update(dt);
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);
