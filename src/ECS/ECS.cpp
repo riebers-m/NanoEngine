@@ -12,6 +12,7 @@ bool ecs::Entity::operator==(const Entity &other) const { return m_id == other.m
 bool ecs::Entity::operator!=(const Entity &other) const { return m_id != other.m_id; }
 bool ecs::Entity::operator>(const Entity &other) const { return m_id > other.m_id; }
 bool ecs::Entity::operator<(const Entity &other) const { return m_id < other.m_id; }
+void ecs::Entity::kill() { m_registry->remove_entity(*this); }
 std::size_t ecs::Entity::get_id() const { return m_id; }
 
 std::size_t ecs::BaseComponent::next_id = 0;
@@ -40,12 +41,19 @@ ecs::Signature ecs::System::get_signature() const { return m_component_signature
 
 ecs::Registry::Registry(Logger logger) :
     m_entity_count{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
-    m_logger{logger} {}
+    m_logger{logger}, m_free_ids{} {}
 ///////////////////////////////////////////////////////////////////////////////////////////
 /// Registry
 ///////////////////////////////////////////////////////////////////////////////////////////
 ecs::Entity ecs::Registry::create_entity() {
-    auto const entity_id = m_entity_count++;
+    size_t entity_id{};
+    if (m_free_ids.empty()) {
+        entity_id = m_entity_count++;
+    } else {
+        entity_id = m_free_ids.front();
+        m_free_ids.pop_front();
+    }
+
     if (entity_id >= m_signatures.size()) {
         m_signatures.resize((m_signatures.size() + 1) * 2);
         m_logger->debug("resizing signatures vector to {}", m_signatures.size());
@@ -56,7 +64,12 @@ ecs::Entity ecs::Registry::create_entity() {
     m_logger->debug("Entity created with id: {}", entity_id);
     return entity;
 }
-void ecs::Registry::remove_entity(Entity const &entity) {}
+
+void ecs::Registry::remove_entity(Entity const &entity) {
+    if (auto const [_, ok] = m_to_be_removed_entities.insert(entity); !ok) {
+        throw std::runtime_error(std::format("could not add entity {} to removed entities", entity.get_id()));
+    }
+}
 void ecs::Registry::add_entity_to_system(Entity const &entity) {
     auto const entity_id = entity.get_id();
     auto const entity_signatures = m_signatures[entity_id];
@@ -69,9 +82,21 @@ void ecs::Registry::add_entity_to_system(Entity const &entity) {
         }
     }
 }
+void ecs::Registry::remove_entity_from_system(Entity entity) {
+    for (auto [_, system]: m_systems) {
+        system->remove_entity(entity);
+    }
+}
 void ecs::Registry::update() {
     for (auto entity: m_to_be_added_entities) {
         add_entity_to_system(entity);
     }
     m_to_be_added_entities.clear();
+
+    for (auto entity: m_to_be_removed_entities) {
+        remove_entity_from_system(entity);
+        m_signatures[entity.get_id()].reset();
+        m_free_ids.push_back(entity.get_id());
+    }
+    m_to_be_removed_entities.clear();
 }

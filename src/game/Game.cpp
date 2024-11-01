@@ -23,7 +23,7 @@
 #include "systems/RenderCollision.hpp"
 
 namespace engine {
-    static bool draw_collsion_bb = false;
+    static bool draw_collsion_bb = true;
 
     Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, uint16_t window_width,
                uint16_t window_height) :
@@ -75,7 +75,6 @@ namespace engine {
         auto row = 0;
         auto col = 0;
         auto const scale = 2.0;
-
         for (auto const &index_row: loader) {
             col = 0;
             for (auto const map_index: index_row) {

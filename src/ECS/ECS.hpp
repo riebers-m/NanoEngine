@@ -5,6 +5,7 @@
 #ifndef ECS_HPP
 #define ECS_HPP
 #include <bitset>
+#include <deque>
 #include <set>
 #include <typeindex>
 #include <unordered_map>
@@ -33,6 +34,7 @@ namespace ecs {
         bool operator>(const Entity &) const;
         bool operator<(const Entity &) const;
 
+        void kill();
 
         [[nodiscard]] std::size_t get_id() const;
         template<typename T, typename... TArgs>
@@ -154,6 +156,8 @@ namespace ecs {
         // [index = system typeid]
         Systems m_systems;
         Logger m_logger;
+        // Entity IDs who was previously removed
+        std::deque<size_t> m_free_ids;
 
     public:
         explicit Registry(Logger logger);
@@ -179,7 +183,7 @@ namespace ecs {
         template<typename T>
         T &get_system() const;
         void add_entity_to_system(Entity const &entity);
-
+        void remove_entity_from_system(Entity);
         void update();
     };
 
