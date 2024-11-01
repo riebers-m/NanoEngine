@@ -25,7 +25,6 @@ namespace systems {
 
             animation.current_frame =
                     static_cast<uint16_t>(animation.elapsed_time * animation.frame_speed_rate) % animation.num_frames;
-            m_logger->debug("Animation current frame for entity{}: {}", entity.get_id(), animation.current_frame);
 
             sprite.src_rect.x = animation.current_frame * sprite.width;
         }

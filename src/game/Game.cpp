@@ -11,15 +11,20 @@
 #include "assetStore/AssetStore.hpp"
 #include "common/TileMapLoader.hpp"
 #include "components/Animation.hpp"
+#include "components/BoxColider.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 #include "const/Const.hpp"
 #include "systems/Animation.hpp"
+#include "systems/Collision.hpp"
 #include "systems/Movement.hpp"
 #include "systems/Render.hpp"
+#include "systems/RenderCollision.hpp"
 
 namespace engine {
+    static bool draw_collsion_bb = false;
+
     Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, uint16_t window_width,
                uint16_t window_height) :
         m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }),
@@ -55,6 +60,8 @@ namespace engine {
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
         m_registry->add_system<systems::Animation>(m_logger);
+        m_registry->add_system<systems::Collision>(m_logger);
+        m_registry->add_system<systems::RenderCollision>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
@@ -91,10 +98,11 @@ namespace engine {
         }
 
         auto chopper = m_registry->create_entity();
-        chopper.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        chopper.add_component<component::Transform>(glm::vec2{10.0, 100.0}, glm::vec2{1.0, 1.0}, 0.0);
         chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
         chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
+        chopper.add_component<component::BoxColider>(32, 32);
 
         auto radar = m_registry->create_entity();
         radar.add_component<component::Transform>(glm::vec2{m_window_width - 74, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
@@ -102,15 +110,17 @@ namespace engine {
         radar.add_component<component::Sprite>("radar-image", 64, 64, 2);
         radar.add_component<component::Animation>(8, 10, component::animate::infinite);
 
-        // auto tank = m_registry->create_entity();
-        // tank.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        // tank.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
-        // tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
-        //
-        // auto truck = m_registry->create_entity();
-        // truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        // truck.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
-        // truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
+        auto tank = m_registry->create_entity();
+        tank.add_component<component::Transform>(glm::vec2{200.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        tank.add_component<component::RigidBody>(glm::vec2{-30.0, 0.0});
+        tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
+        tank.add_component<component::BoxColider>(32, 32);
+
+        auto truck = m_registry->create_entity();
+        truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        truck.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
+        truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
+        truck.add_component<component::BoxColider>(32, 32);
     }
 
     float Game::variable_time() {
@@ -145,6 +155,9 @@ namespace engine {
                     if (evnt.key.keysym.sym == SDLK_ESCAPE) {
                         m_is_running = false;
                     }
+                    if (evnt.key.keysym.sym == SDLK_d) {
+                        draw_collsion_bb = !draw_collsion_bb;
+                    }
                 default:
                     break;
             }
@@ -153,6 +166,7 @@ namespace engine {
     void Game::update(float dt) {
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt);
+        m_registry->get_system<systems::Collision>().update();
         m_registry->get_system<systems::Animation>().update(dt);
     }
     void Game::render() const {
@@ -160,6 +174,10 @@ namespace engine {
         SDL_RenderClear(m_renderer.get());
         try {
             m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get());
+
+            if (draw_collsion_bb) {
+                m_registry->get_system<systems::RenderCollision>().update(m_renderer.get());
+            }
         } catch (std::exception const &e) {
             m_logger->error("render system error: {}", e.what());
         }

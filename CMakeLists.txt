@@ -82,6 +82,13 @@ add_executable(custom_game_engine
         src/components/Animation.hpp
         src/systems/Animation.cpp
         src/systems/Animation.hpp
+        src/components/BoxColider.hpp
+        src/systems/Collision.cpp
+        src/systems/Collision.hpp
+        src/systems/RenderCollision.cpp
+        src/systems/RenderCollision.hpp
+        src/common/Commons.cpp
+        src/common/Commons.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer
