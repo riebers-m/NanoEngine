@@ -89,6 +89,17 @@ add_executable(custom_game_engine
         src/systems/RenderCollision.hpp
         src/common/Commons.cpp
         src/common/Commons.hpp
+        src/events/Collision.cpp
+        src/events/Collision.hpp
+        src/eventBus/EventBus.cpp
+        src/eventBus/EventBus.hpp
+        src/eventBus/Event.hpp
+        src/systems/Damage.cpp
+        src/systems/Damage.hpp
+        src/systems/KeyboardMovement.cpp
+        src/systems/KeyboardMovement.hpp
+        src/events/KeyPressedEvent.cpp
+        src/events/KeyPressedEvent.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

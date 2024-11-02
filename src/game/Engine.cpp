@@ -27,11 +27,11 @@ namespace engine {
         if (SDL_GetCurrentDisplayMode(0, &display_mode) < 0) {
             throw std::runtime_error(std::format("could not get display mode: {}", SDL_GetError()));
         }
-        // window_width = static_cast<uint16_t>(display_mode.w);
-        // window_height = static_cast<uint16_t>(display_mode.h);
+        window_width = static_cast<uint16_t>(display_mode.w);
+        window_height = static_cast<uint16_t>(display_mode.h);
 
-        window_width = 1440;
-        window_height = 900;
+        // window_width = 1440;
+        // window_height = 900;
         SDL_Window *window = SDL_CreateWindow("2D Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                               window_width, window_height, SDL_WINDOW_BORDERLESS);
         if (window == nullptr) {

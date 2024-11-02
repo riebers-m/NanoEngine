@@ -5,6 +5,10 @@
 #ifndef COLLISION_HPP
 #define COLLISION_HPP
 #include "ECS/ECS.hpp"
+
+namespace events {
+    class EventBus;
+}
 namespace systems {
 
     class Collision : public ecs::System {
@@ -15,7 +19,7 @@ namespace systems {
 
     public:
         explicit Collision(Logger logger);
-        void update();
+        void update(events::EventBus *);
     };
 
 } // namespace systems

@@ -13,6 +13,9 @@ namespace ecs {
 }
 struct SDL_Window;
 struct SDL_Renderer;
+namespace events {
+    class EventBus;
+}
 
 namespace engine {
     class AssetStore;
@@ -28,6 +31,7 @@ namespace engine {
         std::shared_ptr<spdlog::logger> m_logger;
         std::unique_ptr<ecs::Registry> m_registry;
         std::unique_ptr<AssetStore> m_asset_store;
+        std::unique_ptr<events::EventBus> m_event_bus;
         uint16_t m_window_width;
         uint16_t m_window_height;
 

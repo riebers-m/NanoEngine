@@ -16,8 +16,12 @@
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 #include "const/Const.hpp"
+#include "eventBus/EventBus.hpp"
+#include "events/KeyPressedEvent.hpp"
 #include "systems/Animation.hpp"
 #include "systems/Collision.hpp"
+#include "systems/Damage.hpp"
+#include "systems/KeyboardMovement.hpp"
 #include "systems/Movement.hpp"
 #include "systems/Render.hpp"
 #include "systems/RenderCollision.hpp"
@@ -29,11 +33,9 @@ namespace engine {
                uint16_t window_height) :
         m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }),
         m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }), m_is_running(true), m_timer{},
-        m_logger(logger), m_window_width{window_width}, m_window_height{window_width} {
-
-        m_registry = std::make_unique<ecs::Registry>(logger);
-        m_asset_store = std::make_unique<AssetStore>(logger);
-    }
+        m_logger(logger), m_registry{std::make_unique<ecs::Registry>(logger)},
+        m_asset_store{std::make_unique<AssetStore>(logger)}, m_event_bus{std::make_unique<events::EventBus>(m_logger)},
+        m_window_width{window_width}, m_window_height{window_width} {}
 
     Game::~Game() {}
 
@@ -62,6 +64,8 @@ namespace engine {
         m_registry->add_system<systems::Animation>(m_logger);
         m_registry->add_system<systems::Collision>(m_logger);
         m_registry->add_system<systems::RenderCollision>(m_logger);
+        m_registry->add_system<systems::Damage>(m_logger);
+        m_registry->add_system<systems::KeyboardMovement>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
@@ -157,15 +161,23 @@ namespace engine {
                     if (evnt.key.keysym.sym == SDLK_d) {
                         draw_collsion_bb = !draw_collsion_bb;
                     }
+                    m_event_bus->emit<events::KeyPressedEvent>(evnt.key.keysym.sym);
                 default:
                     break;
             }
         }
     }
     void Game::update(float dt) {
+        // reset all event handlers for the current frame
+        m_event_bus->clear_subscribers();
+
+        // systems subscribe to events
+        m_registry->get_system<systems::Damage>().subscribe_to_event(m_event_bus.get());
+        m_registry->get_system<systems::KeyboardMovement>().subscribe_to_event(m_event_bus.get());
+
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt);
-        m_registry->get_system<systems::Collision>().update();
+        m_registry->get_system<systems::Collision>().update(m_event_bus.get());
         m_registry->get_system<systems::Animation>().update(dt);
     }
     void Game::render() const {

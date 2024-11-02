@@ -3,18 +3,18 @@
 //
 
 #include "Collision.hpp"
-
 #include "common/Commons.hpp"
-#include "components/Animation.hpp"
 #include "components/BoxColider.hpp"
 #include "components/Transform.hpp"
+#include "eventBus/EventBus.hpp"
+#include "events/Collision.hpp"
 
 namespace systems {
     Collision::Collision(Logger logger) : m_logger{logger} {
         require_component<component::Transform>();
         require_component<component::BoxColider>();
     }
-    void Collision::update() {
+    void Collision::update(events::EventBus *event_bus) {
 
         auto const entities = get_entities();
 
@@ -37,7 +37,8 @@ namespace systems {
                             collider_a.width, collider_a.height, transform_b.position.x + collider_b.offset.x,
                             transform_b.position.y + collider_b.offset.y, collider_b.width, collider_b.height)) {
                     m_logger->debug("collision between entity {} and entity {}", a.get_id(), b.get_id());
-                    // Emit collision Event
+
+                    event_bus->emit<events::Collision>(a, b);
                 }
             }
         }
