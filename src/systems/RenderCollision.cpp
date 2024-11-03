@@ -16,7 +16,7 @@ namespace systems {
         require_component<component::BoxColider>();
     }
 
-    void RenderCollision::update(SDL_Renderer *renderer) {
+    void RenderCollision::update(SDL_Renderer *renderer, SDL_Rect const &camera) {
         if (!renderer) {
             throw std::runtime_error(std::format("render collision error: invalid renderer"));
         }
@@ -33,9 +33,9 @@ namespace systems {
                 continue;
             }
             SDL_SetRenderDrawColor(renderer, 255, 240, 0, SDL_ALPHA_OPAQUE);
-            SDL_Rect const rect_a = {static_cast<int>(transform_a.position.x + collider_a.offset.x),
-                                     static_cast<int>(transform_a.position.y + collider_a.offset.y), collider_a.width,
-                                     collider_a.height};
+            SDL_Rect const rect_a = {static_cast<int>(transform_a.position.x + collider_a.offset.x - camera.x),
+                                     static_cast<int>(transform_a.position.y + collider_a.offset.y - camera.y),
+                                     collider_a.width, collider_a.height};
             SDL_RenderDrawRect(renderer, &rect_a);
 
             for (auto j = itr + 1; j != entities.end(); ++j) {
@@ -53,9 +53,10 @@ namespace systems {
                         already_drawn.emplace_back(a.get_id());
                     }
                     if (std::ranges::find(already_drawn, b.get_id()) == already_drawn.end()) {
-                        SDL_Rect const rect_b = {static_cast<int>(transform_b.position.x + collider_b.offset.x),
-                                                 static_cast<int>(transform_b.position.y + collider_b.offset.y),
-                                                 collider_b.width, collider_b.height};
+                        SDL_Rect const rect_b = {
+                                static_cast<int>(transform_b.position.x + collider_b.offset.x - camera.x),
+                                static_cast<int>(transform_b.position.y + collider_b.offset.y - camera.y),
+                                collider_b.width, collider_b.height};
                         SDL_RenderDrawRect(renderer, &rect_b);
                         already_drawn.emplace_back(b.get_id());
                     }

@@ -4,7 +4,11 @@
 
 #ifndef RENDERSYSTEM_HPP
 #define RENDERSYSTEM_HPP
+#include <SDL_render.h>
+
+
 #include "ECS/ECS.hpp"
+#include "config/Configuration.hpp"
 
 namespace engine {
     class AssetStore;
@@ -20,7 +24,7 @@ namespace systems {
 
     public:
         explicit RenderSystem(Logger);
-        void update(SDL_Renderer *, engine::AssetStore const *asset_store) const;
+        void update(SDL_Renderer *, engine::AssetStore const *asset_store, SDL_Rect const &camera) const;
     };
 } // namespace systems
 

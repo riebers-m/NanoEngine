@@ -100,6 +100,11 @@ add_executable(custom_game_engine
         src/systems/KeyboardMovement.hpp
         src/events/KeyPressedEvent.cpp
         src/events/KeyPressedEvent.hpp
+        src/components/KeyboardControlled.hpp
+        src/components/CameraFollow.hpp
+        src/systems/CameraMovement.cpp
+        src/systems/CameraMovement.hpp
+        src/config/Configuration.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

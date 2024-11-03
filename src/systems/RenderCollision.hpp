@@ -4,6 +4,9 @@
 
 #ifndef RENDERCOLLISION_HPP
 #define RENDERCOLLISION_HPP
+#include <SDL_render.h>
+
+
 #include "ECS/ECS.hpp"
 
 struct SDL_Renderer;
@@ -19,7 +22,7 @@ namespace systems {
     public:
         explicit RenderCollision(Logger logger);
 
-        void update(SDL_Renderer *);
+        void update(SDL_Renderer *, SDL_Rect const &camera);
     };
 
 } // namespace systems

@@ -47,5 +47,7 @@ namespace engine {
         }
         file.close();
     }
-    int TileMapLoader::size() const { return m_tile_size; }
+    size_t TileMapLoader::tile_size() const { return m_tile_size; }
+    size_t TileMapLoader::map_width() const { return m_index_map.at(0).size(); }
+    size_t TileMapLoader::map_height() const { return m_index_map.size(); }
 } // namespace engine

@@ -24,7 +24,11 @@ namespace engine {
         explicit TileMapLoader(Logger logger, int tile_size = 32);
 
         void load_index_map(std::filesystem::path const &path);
-        [[nodiscard]] int size() const;
+        [[nodiscard]] size_t tile_size() const;
+        // Number of tiles per row
+        [[nodiscard]] size_t map_width() const;
+        // Number of tiles per colum
+        [[nodiscard]] size_t map_height() const;
 
         IndexContainer::iterator begin() { return m_index_map.begin(); }
         IndexContainer::iterator end() { return m_index_map.end(); }

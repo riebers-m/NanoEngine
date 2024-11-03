@@ -12,13 +12,17 @@
 #include "common/TileMapLoader.hpp"
 #include "components/Animation.hpp"
 #include "components/BoxColider.hpp"
+#include "components/CameraFollow.hpp"
+#include "components/KeyboardControlled.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
+#include "config/Configuration.hpp"
 #include "const/Const.hpp"
 #include "eventBus/EventBus.hpp"
 #include "events/KeyPressedEvent.hpp"
 #include "systems/Animation.hpp"
+#include "systems/CameraMovement.hpp"
 #include "systems/Collision.hpp"
 #include "systems/Damage.hpp"
 #include "systems/KeyboardMovement.hpp"
@@ -29,13 +33,12 @@
 namespace engine {
     static bool draw_collsion_bb = true;
 
-    Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, uint16_t window_width,
-               uint16_t window_height) :
+    Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, Configuration const &config) :
         m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }),
         m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }), m_is_running(true), m_timer{},
         m_logger(logger), m_registry{std::make_unique<ecs::Registry>(logger)},
         m_asset_store{std::make_unique<AssetStore>(logger)}, m_event_bus{std::make_unique<events::EventBus>(m_logger)},
-        m_window_width{window_width}, m_window_height{window_width} {}
+        m_config{config}, m_camera{0, 0, config.window_width, config.window_height} {}
 
     Game::~Game() {}
 
@@ -66,11 +69,12 @@ namespace engine {
         m_registry->add_system<systems::RenderCollision>(m_logger);
         m_registry->add_system<systems::Damage>(m_logger);
         m_registry->add_system<systems::KeyboardMovement>(m_logger);
+        m_registry->add_system<systems::CameraMovement>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
-        m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER);
+        m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
         m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
 
         TileMapLoader loader{m_logger};
@@ -99,6 +103,8 @@ namespace engine {
             }
             ++row;
         }
+        m_config.map_width = static_cast<size_t>(loader.map_width() * loader.tile_size() * scale);
+        m_config.map_height = static_cast<size_t>(loader.map_height() * loader.tile_size() * scale);
 
         auto chopper = m_registry->create_entity();
         chopper.add_component<component::Transform>(glm::vec2{10.0, 100.0}, glm::vec2{1.0, 1.0}, 0.0);
@@ -106,9 +112,13 @@ namespace engine {
         chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
         chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
         chopper.add_component<component::BoxColider>(32, 32);
+        chopper.add_component<component::KeyboardControlled>(glm::vec2{0, -80}, glm::vec2{80, 0}, glm::vec2{0, 80},
+                                                             glm::vec2{-80, 0});
+        chopper.add_component<component::CameraFollow>();
 
         auto radar = m_registry->create_entity();
-        radar.add_component<component::Transform>(glm::vec2{m_window_width - 74, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        radar.add_component<component::Transform>(glm::vec2{m_config.window_width - 74, 10.0}, glm::vec2{1.0, 1.0},
+                                                  0.0);
         radar.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         radar.add_component<component::Sprite>("radar-image", 64, 64, 2);
         radar.add_component<component::Animation>(8, 10, component::animate::infinite);
@@ -118,12 +128,6 @@ namespace engine {
         tank.add_component<component::RigidBody>(glm::vec2{-30.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
         tank.add_component<component::BoxColider>(32, 32);
-
-        auto truck = m_registry->create_entity();
-        truck.add_component<component::Transform>(glm::vec2{10.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        truck.add_component<component::RigidBody>(glm::vec2{30.0, 0.0});
-        truck.add_component<component::Sprite>("truck-image", 32, 32, 1);
-        truck.add_component<component::BoxColider>(32, 32);
     }
 
     float Game::variable_time() {
@@ -179,15 +183,16 @@ namespace engine {
         m_registry->get_system<systems::Movement>().update(dt);
         m_registry->get_system<systems::Collision>().update(m_event_bus.get());
         m_registry->get_system<systems::Animation>().update(dt);
+        m_registry->get_system<systems::CameraMovement>().update(m_camera, m_config);
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);
         SDL_RenderClear(m_renderer.get());
         try {
-            m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get());
+            m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
 
             if (draw_collsion_bb) {
-                m_registry->get_system<systems::RenderCollision>().update(m_renderer.get());
+                m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
             }
         } catch (std::exception const &e) {
             m_logger->error("render system error: {}", e.what());
