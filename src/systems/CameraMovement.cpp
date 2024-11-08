@@ -22,8 +22,6 @@ namespace systems {
                                                    static_cast<double>(config.map_width - camera.w)));
             camera.y = static_cast<int>(glm::clamp(static_cast<double>(transform.position.y - (camera.h / 2)), 0.0,
                                                    static_cast<double>(config.map_height - camera.h)));
-
-            m_logger->debug("changed camera position to {}, {}", camera.x, camera.y);
         }
     }
 } // namespace systems

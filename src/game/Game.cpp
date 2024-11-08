@@ -7,13 +7,16 @@
 #include <glm/glm.hpp>
 #include <thread>
 
+#include <chrono>
 #include "ECS/ECS.hpp"
 #include "assetStore/AssetStore.hpp"
 #include "common/TileMapLoader.hpp"
 #include "components/Animation.hpp"
 #include "components/BoxColider.hpp"
 #include "components/CameraFollow.hpp"
+#include "components/Health.hpp"
 #include "components/KeyboardControlled.hpp"
+#include "components/ProjectileEmitter.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
@@ -27,8 +30,12 @@
 #include "systems/Damage.hpp"
 #include "systems/KeyboardMovement.hpp"
 #include "systems/Movement.hpp"
+#include "systems/ProjectileEmitter.hpp"
+#include "systems/ProjectileLifecycle.hpp"
 #include "systems/Render.hpp"
 #include "systems/RenderCollision.hpp"
+
+using namespace std::chrono_literals;
 
 namespace engine {
     static bool draw_collsion_bb = true;
@@ -70,12 +77,15 @@ namespace engine {
         m_registry->add_system<systems::Damage>(m_logger);
         m_registry->add_system<systems::KeyboardMovement>(m_logger);
         m_registry->add_system<systems::CameraMovement>(m_logger);
+        m_registry->add_system<systems::ProjectileEmitter>(m_logger, m_registry.get());
+        m_registry->add_system<systems::ProjectileLifecycle>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
         m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
         m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
+        m_asset_store->add_texture(m_renderer.get(), "bullet-image", engine::BULLET);
 
         TileMapLoader loader{m_logger};
         loader.load_index_map(engine::JUNGLE_INDEX_MAP);
@@ -98,7 +108,8 @@ namespace engine {
                             std::format("invalid y index ({}) for tile with index {}", src_Y, map_index));
                 }
                 tile.add_component<component::Sprite>("tilemap", engine::TILE_SIZE, engine::TILE_SIZE, 0,
-                                                      engine::TILE_SIZE * src_X, engine::TILE_SIZE * src_Y);
+                                                      component::Sprite::Position::free, engine::TILE_SIZE * src_X,
+                                                      engine::TILE_SIZE * src_Y);
                 ++col;
             }
             ++row;
@@ -115,19 +126,34 @@ namespace engine {
         chopper.add_component<component::KeyboardControlled>(glm::vec2{0, -80}, glm::vec2{80, 0}, glm::vec2{0, 80},
                                                              glm::vec2{-80, 0});
         chopper.add_component<component::CameraFollow>();
+        chopper.add_component<component::Health>();
+        chopper.add_component<component::ProjectileEmitter>(glm::vec2{120.0, 120.0}, 0s, 10s,
+                                                            component::ProjectileEmitter::Attitude::friendly, 0,
+                                                            component::ProjectileEmitter::Repeater::manual);
 
         auto radar = m_registry->create_entity();
         radar.add_component<component::Transform>(glm::vec2{m_config.window_width - 74, 10.0}, glm::vec2{1.0, 1.0},
                                                   0.0);
         radar.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
-        radar.add_component<component::Sprite>("radar-image", 64, 64, 2);
+        radar.add_component<component::Sprite>("radar-image", 64, 64, 2, component::Sprite::Position::fixed);
         radar.add_component<component::Animation>(8, 10, component::animate::infinite);
 
         auto tank = m_registry->create_entity();
         tank.add_component<component::Transform>(glm::vec2{200.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
-        tank.add_component<component::RigidBody>(glm::vec2{-30.0, 0.0});
+        tank.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
         tank.add_component<component::BoxColider>(32, 32);
+        tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
+                                                         component::ProjectileEmitter::Attitude::enemy, 0);
+        tank.add_component<component::Health>();
+        auto truck = m_registry->create_entity();
+        truck.add_component<component::Transform>(glm::vec2{600.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        truck.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
+        truck.add_component<component::Sprite>("truck-image", 32, 32, 2);
+        truck.add_component<component::BoxColider>(32, 32);
+        truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
+                                                          component::ProjectileEmitter::Attitude::enemy, 0);
+        truck.add_component<component::Health>();
     }
 
     float Game::variable_time() {
@@ -177,13 +203,16 @@ namespace engine {
 
         // systems subscribe to events
         m_registry->get_system<systems::Damage>().subscribe_to_event(m_event_bus.get());
+        m_registry->get_system<systems::ProjectileEmitter>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::KeyboardMovement>().subscribe_to_event(m_event_bus.get());
 
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt);
+        m_registry->get_system<systems::ProjectileEmitter>().update();
         m_registry->get_system<systems::Collision>().update(m_event_bus.get());
         m_registry->get_system<systems::Animation>().update(dt);
         m_registry->get_system<systems::CameraMovement>().update(m_camera, m_config);
+        m_registry->get_system<systems::ProjectileLifecycle>().update();
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);

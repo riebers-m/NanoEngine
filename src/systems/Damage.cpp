@@ -13,10 +13,10 @@ namespace systems {
         event_bus->subscribe<events::Collision>([this](events::Collision &event) { on_collision(event); });
     }
     void Damage::on_collision(events::Collision &event) {
-        m_logger->debug("damage system received collision event between {} <-> {}.", event.a.get_id(),
-                        event.b.get_id());
-        event.a.kill();
-        event.b.kill();
+        // m_logger->debug("damage system received collision event between {} <-> {}.", event.a.get_id(),
+        //                 event.b.get_id());
+        // event.a.kill();
+        // event.b.kill();
     }
     void Damage::update() {}
 } // namespace systems

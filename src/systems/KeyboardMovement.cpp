@@ -20,8 +20,6 @@ namespace systems {
         event_bus->subscribe<events::KeyPressedEvent>([this](events::KeyPressedEvent &event) { on_movement(event); });
     }
     void KeyboardMovement::on_movement(events::KeyPressedEvent &event) {
-        // TODO:
-        // Change the sprite and velocity
         for (auto const entity: get_entities()) {
             auto const keyboard_controlled = entity.get_component<component::KeyboardControlled>();
             auto &sprite = entity.get_component<component::Sprite>();

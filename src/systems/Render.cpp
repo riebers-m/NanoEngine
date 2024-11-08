@@ -39,10 +39,13 @@ void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore co
             // Set source rect of original texture (sometime subrectangle if src is a sprite map
             SDL_Rect const src_rect = sprite.src_rect;
             // Set dest rect with x,y position to be rendered
-            SDL_Rect const dest_rect = {static_cast<int>(transform.position.x - camera.x),
-                                        static_cast<int>(transform.position.y - camera.y),
-                                        static_cast<int>(sprite.width * transform.scale.x),
-                                        static_cast<int>(sprite.height * transform.scale.y)
+            SDL_Rect const dest_rect = {
+                    static_cast<int>(transform.position.x -
+                                     (sprite.position == component::Sprite::Position::fixed ? 0 : camera.x)),
+                    static_cast<int>(transform.position.y -
+                                     (sprite.position == component::Sprite::Position::fixed ? 0 : camera.y)),
+                    static_cast<int>(sprite.width * transform.scale.x),
+                    static_cast<int>(sprite.height * transform.scale.y)
 
             };
             try {
