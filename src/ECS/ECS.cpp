@@ -98,9 +98,16 @@ void ecs::Registry::update() {
     m_to_be_added_entities.clear();
 
     for (auto entity: m_to_be_removed_entities) {
-
         remove_entity_from_system(entity);
         m_signatures[entity.get_id()].reset();
+
+        // remove the entity from the component pools
+        for (auto pool: m_components) {
+            if (pool) {
+                pool->remove_entity(entity.get_id());
+            }
+        }
+
         m_free_ids.push_back(entity.get_id());
 
         remove_tag(entity);

@@ -113,17 +113,22 @@ namespace ecs {
     class BasePool {
     public:
         virtual ~BasePool() = default;
+
+        virtual void remove_entity(std::size_t entity_id) = 0;
     };
 
     template<typename T>
     class Pool : public BasePool {
     private:
         using Container = std::vector<T>;
-
         Container m_data;
+        std::size_t m_size;
+
+        std::unordered_map<std::size_t, std::size_t> m_entity_to_index;
+        std::unordered_map<std::size_t, std::size_t> m_index_to_entity;
 
     public:
-        explicit Pool(std::size_t size = 1000);
+        explicit Pool(std::size_t capacity = 1000);
         ~Pool() override = default;
 
         [[nodiscard]] bool is_empty() const;
@@ -131,7 +136,9 @@ namespace ecs {
         void resize(std::size_t new_size);
         void clear();
         void add(T const &);
-        void set(std::size_t index, T const &);
+        void set(std::size_t entity_id, T const &);
+        void remove(std::size_t entity_id);
+        void remove_entity(std::size_t entity_id) override;
         T &get(std::size_t index);
         T &operator[](std::size_t index);
     };
@@ -247,16 +254,16 @@ namespace ecs {
     /// Pool
     ///////////////////////////////////////////////////////////////////////////////////////////
     template<typename T>
-    Pool<T>::Pool(std::size_t size) : m_data() {
+    Pool<T>::Pool(std::size_t size) : m_data(), m_size{0} {
         resize(size);
     }
     template<typename T>
     bool Pool<T>::is_empty() const {
-        return m_data.empty();
+        return m_size == 0;
     }
     template<typename T>
     std::size_t Pool<T>::size() const {
-        return m_data.size();
+        return m_size;
     }
     template<typename T>
     void Pool<T>::resize(std::size_t new_size) {
@@ -265,25 +272,60 @@ namespace ecs {
     template<typename T>
     void Pool<T>::clear() {
         m_data.clear();
+        m_size = 0;
     }
     template<typename T>
     void Pool<T>::add(T const &component) {
         m_data.push_back(component);
     }
     template<typename T>
-    void Pool<T>::set(std::size_t index, T const &component) {
-        if (index >= size()) {
-            throw std::out_of_range(std::format("index {} out of range", index));
+    void Pool<T>::set(std::size_t entity_id, T const &component) {
+        if (m_entity_to_index.contains(entity_id)) {
+            auto const index = m_entity_to_index[entity_id];
+            m_data[index] = component;
+        } else {
+            auto const index = m_size;
+            m_entity_to_index.emplace(entity_id, index);
+            m_index_to_entity.emplace(index, entity_id);
+            if (index >= m_data.capacity()) {
+                m_data.resize(m_size * 2);
+            }
+            m_data[index] = component;
+            m_size++;
         }
-        m_data[index] = component;
     }
     template<typename T>
-    T &Pool<T>::get(std::size_t index) {
-        if (index >= size()) {
-            throw std::out_of_range(
-                    std::format("index {} >= {} out of range for component pool {}", index, size(), typeid(T).name()));
+    void Pool<T>::remove(std::size_t entity_id) {
+        if (m_entity_to_index.contains(entity_id)) {
+            // copy last component to the removed position
+            auto const index_of_removed = m_entity_to_index[entity_id];
+            auto const last_index = m_size - 1;
+            m_data[index_of_removed] = m_data[last_index];
+
+            // update the index-entity maps to point to correct elements
+            auto const last_entity = m_index_to_entity[last_index];
+            m_entity_to_index[last_entity] = index_of_removed;
+            m_index_to_entity[index_of_removed] = last_entity;
+
+            m_entity_to_index.erase(entity_id);
+            m_index_to_entity.erase(last_index);
+            m_size--;
         }
-        return m_data[index];
+    }
+    template<typename T>
+    void Pool<T>::remove_entity(std::size_t entity_id) {
+        if (m_entity_to_index.contains(entity_id)) {
+            remove(entity_id);
+        }
+    }
+    template<typename T>
+    T &Pool<T>::get(std::size_t entity_id) {
+        if (!m_entity_to_index.contains(entity_id)) {
+            throw std::out_of_range(std::format("index {} >= {} out of range for component pool {}", entity_id, size(),
+                                                typeid(T).name()));
+        }
+        auto const index = m_entity_to_index[entity_id];
+        return static_cast<T &>(m_data[index]);
     }
     template<typename T>
     T &Pool<T>::operator[](std::size_t index) {
@@ -298,7 +340,7 @@ namespace ecs {
         auto const component_id = Component<T>::get_id();
         auto const entity_id = entity.get_id();
 
-        if (entity_id >= m_signatures.size()) {
+        if (entity_id > m_signatures.size()) {
             throw std::out_of_range(std::format("Entity Id {} signature out of range", entity_id));
         }
 
@@ -314,27 +356,28 @@ namespace ecs {
 
         auto component_pool = std::static_pointer_cast<Pool<T>>(m_components[component_id]);
 
-        if (entity_id >= component_pool->size()) {
-            component_pool->resize((component_pool->size() + 1) * 2);
-            m_logger->debug("resizing component pool {} to {}", typeid(T).name(), component_pool->size());
-        }
         T new_component{std::forward<TArgs>(args)...};
 
         component_pool->set(entity_id, new_component);
         m_signatures[entity_id].set(component_id);
 
         m_logger->debug("component id {} was added to entity id {}", component_id, entity_id);
+        m_logger->debug("component id {} ---> pool size: {}", component_id, component_pool->size());
     }
     template<typename T>
     void Registry::remove_component(Entity const &entity) {
         auto const component_id = Component<T>::get_id();
         auto const entity_id = entity.get_id();
 
-        if (entity_id >= m_signatures.size()) {
+        if (entity_id > m_signatures.size()) {
             throw std::out_of_range(std::format("Entity Id {} signature out of range", entity_id));
         }
 
+        auto component_pool = std::static_pointer_cast<Pool<T>>(m_components[component_id]);
+        component_pool->remove(entity_id);
+
         m_signatures[entity_id].set(component_id, false);
+
         m_logger->debug("component id {} was removed to entity id {}", component_id, entity_id);
     }
 
@@ -343,7 +386,7 @@ namespace ecs {
         auto const component_id = Component<T>::get_id();
         auto const entity_id = entity.get_id();
 
-        if (entity_id >= m_signatures.size()) {
+        if (entity_id > m_signatures.size()) {
             throw std::out_of_range(std::format("Entity Id {} signature out of range", entity_id));
         }
         return m_signatures[entity_id].test(component_id);
@@ -353,7 +396,7 @@ namespace ecs {
         auto const component_id = Component<T>::get_id();
         auto const entity_id = entity.get_id();
 
-        if (component_id >= m_components.size()) {
+        if (component_id > m_components.size()) {
             throw std::out_of_range(std::format("invalid component id {} >= {} for {}", component_id,
                                                 m_components.size(), typeid(T).name()));
         }
