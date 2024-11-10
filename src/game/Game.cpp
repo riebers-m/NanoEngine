@@ -107,6 +107,7 @@ namespace engine {
                     throw std::runtime_error(
                             std::format("invalid y index ({}) for tile with index {}", src_Y, map_index));
                 }
+                tile.group("tiles");
                 tile.add_component<component::Sprite>("tilemap", engine::TILE_SIZE, engine::TILE_SIZE, 0,
                                                       component::Sprite::Position::free, engine::TILE_SIZE * src_X,
                                                       engine::TILE_SIZE * src_Y);
@@ -118,6 +119,7 @@ namespace engine {
         m_config.map_height = static_cast<size_t>(loader.map_height() * loader.tile_size() * scale);
 
         auto chopper = m_registry->create_entity();
+        chopper.tag("player");
         chopper.add_component<component::Transform>(glm::vec2{10.0, 100.0}, glm::vec2{1.0, 1.0}, 0.0);
         chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
@@ -128,7 +130,7 @@ namespace engine {
         chopper.add_component<component::CameraFollow>();
         chopper.add_component<component::Health>();
         chopper.add_component<component::ProjectileEmitter>(glm::vec2{120.0, 120.0}, 0s, 10s,
-                                                            component::ProjectileEmitter::Attitude::friendly, 0,
+                                                            component::ProjectileEmitter::Attitude::friendly, 10,
                                                             component::ProjectileEmitter::Repeater::manual);
 
         auto radar = m_registry->create_entity();
@@ -139,20 +141,22 @@ namespace engine {
         radar.add_component<component::Animation>(8, 10, component::animate::infinite);
 
         auto tank = m_registry->create_entity();
+        tank.group("enemies");
         tank.add_component<component::Transform>(glm::vec2{200.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
         tank.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
         tank.add_component<component::BoxColider>(32, 32);
         tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
-                                                         component::ProjectileEmitter::Attitude::enemy, 0);
+                                                         component::ProjectileEmitter::Attitude::enemy, 10);
         tank.add_component<component::Health>();
         auto truck = m_registry->create_entity();
+        truck.group("enemies");
         truck.add_component<component::Transform>(glm::vec2{600.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
         truck.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         truck.add_component<component::Sprite>("truck-image", 32, 32, 2);
         truck.add_component<component::BoxColider>(32, 32);
         truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
-                                                          component::ProjectileEmitter::Attitude::enemy, 0);
+                                                          component::ProjectileEmitter::Attitude::enemy, 10);
         truck.add_component<component::Health>();
     }
 

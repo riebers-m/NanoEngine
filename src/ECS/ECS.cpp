@@ -8,6 +8,10 @@
 #include "spdlog/logger.h"
 
 ecs::Entity::Entity(std::size_t id, Registry *registry) : m_id(id), m_registry{registry} {}
+void ecs::Entity::tag(std::string const &tag) { m_registry->add_tag(*this, tag); }
+bool ecs::Entity::has_tag(std::string const &tag) const { return m_registry->has_tag(*this, tag); }
+void ecs::Entity::group(std::string const &group) { m_registry->add_to_group(*this, group); }
+bool ecs::Entity::has_group(std::string const &group) const { return m_registry->has_group(*this, group); }
 bool ecs::Entity::operator==(const Entity &other) const { return m_id == other.m_id; }
 bool ecs::Entity::operator!=(const Entity &other) const { return m_id != other.m_id; }
 bool ecs::Entity::operator>(const Entity &other) const { return m_id > other.m_id; }
@@ -41,7 +45,7 @@ ecs::Signature ecs::System::get_signature() const { return m_component_signature
 
 ecs::Registry::Registry(Logger logger) :
     m_entity_count{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
-    m_logger{logger}, m_free_ids{} {}
+    m_logger{logger}, m_free_ids{}, m_tag_per_entity{}, m_entity_per_tag{}, m_entity_groups{}, m_groupe_per_entity{} {}
 ///////////////////////////////////////////////////////////////////////////////////////////
 /// Registry
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -94,9 +98,55 @@ void ecs::Registry::update() {
     m_to_be_added_entities.clear();
 
     for (auto entity: m_to_be_removed_entities) {
+
         remove_entity_from_system(entity);
         m_signatures[entity.get_id()].reset();
         m_free_ids.push_back(entity.get_id());
+
+        remove_tag(entity);
+        remove_from_group(entity);
     }
     m_to_be_removed_entities.clear();
+}
+void ecs::Registry::add_tag(Entity entity, std::string const &tag) {
+    m_tag_per_entity.insert({entity.get_id(), tag});
+    m_entity_per_tag.insert({tag, entity});
+}
+bool ecs::Registry::has_tag(Entity entity, std::string const &tag) const {
+    if (!m_tag_per_entity.contains(entity.get_id())) {
+        return false;
+    }
+    return m_tag_per_entity.find(entity.get_id())->second == tag;
+}
+ecs::Entity ecs::Registry::get_entity(std::string const &tag) const { return m_entity_per_tag.at(tag); }
+void ecs::Registry::remove_tag(Entity entity) {
+    if (auto itr = m_tag_per_entity.find(entity.get_id()); itr != m_tag_per_entity.end()) {
+        m_entity_per_tag.erase(itr->second);
+        m_tag_per_entity.erase(itr);
+    }
+}
+void ecs::Registry::add_to_group(Entity entity, std::string const &group) {
+    m_entity_groups.insert({group, std::set<Entity>{}});
+    m_entity_groups[group].insert(entity);
+    m_groupe_per_entity.insert({entity.get_id(), group});
+}
+bool ecs::Registry::has_group(Entity entity, std::string const &group) const {
+    if (auto const itr = m_groupe_per_entity.find(entity.get_id()); itr != m_groupe_per_entity.end()) {
+        return itr->second == group;
+    }
+    return false;
+}
+std::vector<ecs::Entity> ecs::Registry::get_entities_from_group(std::string const &group) const {
+    auto const group_set = m_entity_groups.at(group);
+    return std::vector<Entity>{group_set.cbegin(), group_set.cend()};
+}
+void ecs::Registry::remove_from_group(Entity entity) {
+    if (auto group_tag = m_groupe_per_entity.find(entity.get_id()); group_tag != m_groupe_per_entity.end()) {
+        if (auto group = m_entity_groups.find(group_tag->second); group != m_entity_groups.end()) {
+            if (auto entity_in_group = group->second.find(entity); entity_in_group != group->second.end()) {
+                group->second.erase(entity_in_group);
+                m_groupe_per_entity.erase(group_tag);
+            }
+        }
+    }
 }

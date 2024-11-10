@@ -36,6 +36,7 @@ namespace systems {
                     projectile_position.y += (transform.scale.y * sprite.height / 2);
                 }
                 auto projectile = m_registry->create_entity();
+                projectile.group("projectiles");
                 projectile.add_component<component::Transform>(projectile_position, transform.scale,
                                                                transform.rotation);
                 projectile.add_component<component::RigidBody>(projectile_emitter.velocity);
@@ -66,6 +67,7 @@ namespace systems {
                         projectile_position.y += (transform.scale.y * sprite.height / 2);
                     }
                     auto projectile = m_registry->create_entity();
+                    projectile.group("projectiles");
                     projectile.add_component<component::Transform>(projectile_position, transform.scale,
                                                                    transform.rotation);
 

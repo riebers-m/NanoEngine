@@ -25,6 +25,8 @@ namespace systems {
         void subscribe_to_event(events::EventBus *);
         void on_collision(events::Collision &event);
         void update();
+        void on_projectile_hits_player(ecs::Entity projectile, ecs::Entity player);
+        void on_projectile_hits_enemy(ecs::Entity projectile, ecs::Entity enemy);
     };
 
 } // namespace systems

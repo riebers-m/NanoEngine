@@ -29,6 +29,12 @@ namespace ecs {
         explicit Entity(std::size_t id, Registry *registry);
         Entity &operator=(Entity const &) = default;
 
+        // Tag & Group management
+        void tag(std::string const &tag);
+        bool has_tag(std::string const &tag) const;
+        void group(std::string const &group);
+        bool has_group(std::string const &group) const;
+
         bool operator==(const Entity &) const;
         bool operator!=(const Entity &) const;
         bool operator>(const Entity &) const;
@@ -159,6 +165,12 @@ namespace ecs {
         // Entity IDs who was previously removed
         std::deque<size_t> m_free_ids;
 
+        std::unordered_map<std::size_t, std::string> m_tag_per_entity;
+        std::unordered_map<std::string, Entity> m_entity_per_tag;
+
+        std::unordered_map<std::string, std::set<Entity>> m_entity_groups;
+        std::unordered_map<std::size_t, std::string> m_groupe_per_entity;
+
     public:
         explicit Registry(Logger logger);
 
@@ -185,6 +197,18 @@ namespace ecs {
         void add_entity_to_system(Entity const &entity);
         void remove_entity_from_system(Entity);
         void update();
+
+        // Tag management
+        void add_tag(Entity entity, std::string const &tag);
+        [[nodiscard]] bool has_tag(Entity entity, std::string const &tag) const;
+        [[nodiscard]] Entity get_entity(std::string const &tag) const;
+        void remove_tag(Entity entity);
+
+        // Group management
+        void add_to_group(Entity entity, std::string const &group);
+        [[nodiscard]] bool has_group(Entity entity, std::string const &group) const;
+        [[nodiscard]] std::vector<Entity> get_entities_from_group(std::string const &group) const;
+        void remove_from_group(Entity entity);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////
