@@ -29,6 +29,7 @@
 #include "systems/CameraMovement.hpp"
 #include "systems/Collision.hpp"
 #include "systems/Damage.hpp"
+#include "systems/HealthBar.hpp"
 #include "systems/KeyboardMovement.hpp"
 #include "systems/Movement.hpp"
 #include "systems/ProjectileEmitter.hpp"
@@ -82,6 +83,7 @@ namespace engine {
         m_registry->add_system<systems::ProjectileEmitter>(m_logger, m_registry.get());
         m_registry->add_system<systems::ProjectileLifecycle>(m_logger);
         m_registry->add_system<systems::RenderText>(m_logger);
+        m_registry->add_system<systems::HealthBar>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
@@ -89,7 +91,8 @@ namespace engine {
         m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
         m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
         m_asset_store->add_texture(m_renderer.get(), "bullet-image", engine::BULLET);
-        m_asset_store->add_font("charriot-font", engine::CHARRIOT_FONT, 20);
+        m_asset_store->add_font("charriot-h1", engine::CHARRIOT_FONT, 20);
+        m_asset_store->add_font("charriot-text", engine::CHARRIOT_FONT, 14);
 
         TileMapLoader loader{m_logger};
         loader.load_index_map(engine::JUNGLE_INDEX_MAP);
@@ -167,7 +170,7 @@ namespace engine {
         SDL_Color white = {255, 255, 255};
         SDL_Color green = {0, 255, 0};
         label.add_component<component::TextLabel>(glm::vec2{m_config.window_width / 2 - 40, 10}, "CHOPPER v1.0",
-                                                  "charriot-font", green);
+                                                  "charriot-h1", green);
     }
 
     float Game::variable_time() {
@@ -234,6 +237,7 @@ namespace engine {
         try {
             m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
+            m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
             }

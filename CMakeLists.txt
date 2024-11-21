@@ -116,6 +116,8 @@ add_executable(custom_game_engine
         src/components/Common.hpp
         src/systems/RenderText.cpp
         src/systems/RenderText.hpp
+        src/systems/HealthBar.cpp
+        src/systems/HealthBar.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer
