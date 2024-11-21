@@ -8,7 +8,6 @@
 
 
 #include "ECS/ECS.hpp"
-#include "config/Configuration.hpp"
 
 namespace engine {
     class AssetStore;

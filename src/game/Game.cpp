@@ -19,6 +19,7 @@
 #include "components/ProjectileEmitter.hpp"
 #include "components/RigidBody.hpp"
 #include "components/Sprite.hpp"
+#include "components/TextLabel.hpp"
 #include "components/Transform.hpp"
 #include "config/Configuration.hpp"
 #include "const/Const.hpp"
@@ -34,6 +35,7 @@
 #include "systems/ProjectileLifecycle.hpp"
 #include "systems/Render.hpp"
 #include "systems/RenderCollision.hpp"
+#include "systems/RenderText.hpp"
 
 using namespace std::chrono_literals;
 
@@ -79,6 +81,7 @@ namespace engine {
         m_registry->add_system<systems::CameraMovement>(m_logger);
         m_registry->add_system<systems::ProjectileEmitter>(m_logger, m_registry.get());
         m_registry->add_system<systems::ProjectileLifecycle>(m_logger);
+        m_registry->add_system<systems::RenderText>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
@@ -86,6 +89,7 @@ namespace engine {
         m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
         m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
         m_asset_store->add_texture(m_renderer.get(), "bullet-image", engine::BULLET);
+        m_asset_store->add_font("charriot-font", engine::CHARRIOT_FONT, 20);
 
         TileMapLoader loader{m_logger};
         loader.load_index_map(engine::JUNGLE_INDEX_MAP);
@@ -109,7 +113,7 @@ namespace engine {
                 }
                 tile.group("tiles");
                 tile.add_component<component::Sprite>("tilemap", engine::TILE_SIZE, engine::TILE_SIZE, 0,
-                                                      component::Sprite::Position::free, engine::TILE_SIZE * src_X,
+                                                      component::WorldPosition::free, engine::TILE_SIZE * src_X,
                                                       engine::TILE_SIZE * src_Y);
                 ++col;
             }
@@ -120,7 +124,7 @@ namespace engine {
 
         auto chopper = m_registry->create_entity();
         chopper.tag("player");
-        chopper.add_component<component::Transform>(glm::vec2{10.0, 100.0}, glm::vec2{1.0, 1.0}, 0.0);
+        chopper.add_component<component::Transform>(glm::vec2{240.0, 110.0}, glm::vec2{1.0, 1.0}, 0.0);
         chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
         chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
@@ -137,12 +141,12 @@ namespace engine {
         radar.add_component<component::Transform>(glm::vec2{m_config.window_width - 74, 10.0}, glm::vec2{1.0, 1.0},
                                                   0.0);
         radar.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
-        radar.add_component<component::Sprite>("radar-image", 64, 64, 2, component::Sprite::Position::fixed);
+        radar.add_component<component::Sprite>("radar-image", 64, 64, 2, component::WorldPosition::fixed);
         radar.add_component<component::Animation>(8, 10, component::animate::infinite);
 
         auto tank = m_registry->create_entity();
         tank.group("enemies");
-        tank.add_component<component::Transform>(glm::vec2{200.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        tank.add_component<component::Transform>(glm::vec2{500.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
         tank.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
         tank.add_component<component::BoxColider>(32, 32);
@@ -151,13 +155,19 @@ namespace engine {
         tank.add_component<component::Health>();
         auto truck = m_registry->create_entity();
         truck.group("enemies");
-        truck.add_component<component::Transform>(glm::vec2{600.0, 10.0}, glm::vec2{1.0, 1.0}, 0.0);
+        truck.add_component<component::Transform>(glm::vec2{120.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
         truck.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         truck.add_component<component::Sprite>("truck-image", 32, 32, 2);
         truck.add_component<component::BoxColider>(32, 32);
         truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
                                                           component::ProjectileEmitter::Attitude::enemy, 10);
         truck.add_component<component::Health>();
+
+        auto label = m_registry->create_entity();
+        SDL_Color white = {255, 255, 255};
+        SDL_Color green = {0, 255, 0};
+        label.add_component<component::TextLabel>(glm::vec2{m_config.window_width / 2 - 40, 10}, "CHOPPER v1.0",
+                                                  "charriot-font", green);
     }
 
     float Game::variable_time() {
@@ -223,7 +233,7 @@ namespace engine {
         SDL_RenderClear(m_renderer.get());
         try {
             m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
-
+            m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
             }

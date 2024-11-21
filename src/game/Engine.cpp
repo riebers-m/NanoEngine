@@ -4,6 +4,7 @@
 
 #include "game/Engine.hpp"
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <format>
 #include "spdlog/sinks/stdout_color_sinks.h"
 namespace engine {
@@ -11,16 +12,22 @@ namespace engine {
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
             throw std::runtime_error(std::format("init SDL2 failed: {}", SDL_GetError()));
         }
+        if (TTF_Init() < 0) {
+            throw std::runtime_error(std::format("init ttf failed: {}", TTF_GetError()));
+        }
     }
 
-    Engine::~Engine() { SDL_Quit(); }
+    Engine::~Engine() {
+        SDL_Quit();
+        TTF_Quit();
+    }
 
     Engine const &Engine::instance() {
         static Engine eng = Engine{};
         return eng;
     }
 
-    Game Engine::create(Engine const &) {
+    Game Engine::create(Logger logger, Engine const &) {
         SDL_DisplayMode display_mode;
         if (SDL_GetCurrentDisplayMode(0, &display_mode) < 0) {
             throw std::runtime_error(std::format("could not get display mode: {}", SDL_GetError()));
@@ -45,7 +52,6 @@ namespace engine {
         //     SDL_GetError()));
         // }
 
-        auto logger = spdlog::stdout_color_mt("console", spdlog::color_mode::automatic);
         logger->set_level(spdlog::level::debug);
         return Game{window, renderer, logger, config};
     }
