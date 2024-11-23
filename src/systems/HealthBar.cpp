@@ -28,22 +28,27 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
             color = {255, 165, 0};
         }
 
-        if (SDL_Surface *surface = TTF_RenderText_Blended(asset_store->get_font("charriot-text"),
-                                                          std::format("{}%", health.health_percentage).c_str(), color);
+        if (std::unique_ptr<SDL_Surface, std::function<void(SDL_Surface * s)>> surface{
+                    TTF_RenderText_Blended(asset_store->get_font("charriot-text"),
+                                           std::format("{}%", health.health_percentage).c_str(), color),
+                    [](SDL_Surface *s) { SDL_FreeSurface(s); }};
             surface != nullptr) {
-            if (SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface); texture != nullptr) {
+            if (std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> texture{
+                        SDL_CreateTextureFromSurface(renderer, surface.get()),
+                        [](SDL_Texture *t) { SDL_DestroyTexture(t); }};
+                texture != nullptr) {
+
                 int label_width = 0;
                 int label_height = 0;
 
-                if (SDL_QueryTexture(texture, nullptr, nullptr, &label_width, &label_height) < 0) {
+                if (SDL_QueryTexture(texture.get(), nullptr, nullptr, &label_width, &label_height) < 0) {
                     m_logger->error("query texture failed: {}", SDL_GetError());
-                    SDL_FreeSurface(surface);
                     return;
                 }
                 auto const sprite = entity.get_component<component::Sprite>();
                 SDL_Rect dest = {static_cast<int>(transform.position.x - camera.x + sprite.width / 2),
                                  static_cast<int>(transform.position.y - camera.y - 24), label_width, label_height};
-                SDL_RenderCopy(renderer, texture, nullptr, &dest);
+                SDL_RenderCopy(renderer, texture.get(), nullptr, &dest);
 
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                 SDL_Rect line = {static_cast<int>(transform.position.x - camera.x + sprite.width / 2),
@@ -51,7 +56,6 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
                                  static_cast<int>(sprite.width * health.health_percentage / 100), 3};
                 SDL_RenderFillRect(renderer, &line);
             }
-            SDL_FreeSurface(surface);
         }
     }
 }
