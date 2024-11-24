@@ -7,6 +7,11 @@
 #include <SDL_ttf.h>
 #include <format>
 #include "spdlog/sinks/stdout_color_sinks.h"
+
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
+
 namespace engine {
     Engine::Engine() {
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -20,6 +25,9 @@ namespace engine {
     Engine::~Engine() {
         SDL_Quit();
         TTF_Quit();
+        ImGui_ImplSDLRenderer2_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
     }
 
     Engine const &Engine::instance() {

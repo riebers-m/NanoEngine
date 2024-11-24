@@ -25,6 +25,10 @@
 #include "const/Const.hpp"
 #include "eventBus/EventBus.hpp"
 #include "events/KeyPressedEvent.hpp"
+
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 #include "systems/Animation.hpp"
 #include "systems/CameraMovement.hpp"
 #include "systems/Collision.hpp"
@@ -70,6 +74,10 @@ namespace engine {
         load_level(1);
 
         m_timer.start();
+        // Initialize IMGUI
+        ImGui::CreateContext();
+        ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
+        ImGui_ImplSDLRenderer2_Init(m_renderer.get());
     }
     void Game::load_level(std::size_t level) {
         m_registry->add_system<systems::Movement>(m_logger);
@@ -197,6 +205,8 @@ namespace engine {
     void Game::process_input() {
         SDL_Event evnt = {};
         while (SDL_PollEvent(&evnt)) {
+            ImGui_ImplSDL2_ProcessEvent(&evnt);
+
             switch (evnt.type) {
                 case SDL_QUIT:
                     m_is_running = false;
@@ -240,6 +250,16 @@ namespace engine {
             m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
+
+                ImGui_ImplSDLRenderer2_NewFrame();
+                ImGui_ImplSDL2_NewFrame();
+                ImGui::NewFrame();
+                ImGui::ShowDemoWindow();
+
+                ImGui::Render();
+                ImGuiIO const &io = ImGui::GetIO();
+                SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+                ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
             }
         } catch (std::exception const &e) {
             m_logger->error("render system error: {}", e.what());
