@@ -54,13 +54,16 @@ namespace engine {
         m_asset_store{std::make_unique<AssetStore>(logger)}, m_event_bus{std::make_unique<events::EventBus>(m_logger)},
         m_config{config}, m_camera{0, 0, config.window_width, config.window_height} {}
 
-    Game::~Game() {}
+    Game::~Game() {
+        ImGui_ImplSDLRenderer2_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
+    }
 
     void Game::run() {
         setup();
 
         while (m_is_running) {
-
             auto const dt = variable_time();
             // auto const dt = fixed_time();
             process_input();
