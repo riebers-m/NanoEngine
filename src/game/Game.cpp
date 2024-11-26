@@ -40,6 +40,7 @@
 #include "systems/ProjectileLifecycle.hpp"
 #include "systems/Render.hpp"
 #include "systems/RenderCollision.hpp"
+#include "systems/RenderGUI.hpp"
 #include "systems/RenderText.hpp"
 
 using namespace std::chrono_literals;
@@ -95,6 +96,7 @@ namespace engine {
         m_registry->add_system<systems::ProjectileLifecycle>(m_logger);
         m_registry->add_system<systems::RenderText>(m_logger);
         m_registry->add_system<systems::HealthBar>(m_logger);
+        m_registry->add_system<systems::RenderGUI>(m_logger);
 
         m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
         m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
@@ -253,16 +255,7 @@ namespace engine {
             m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
-
-                ImGui_ImplSDLRenderer2_NewFrame();
-                ImGui_ImplSDL2_NewFrame();
-                ImGui::NewFrame();
-                ImGui::ShowDemoWindow();
-
-                ImGui::Render();
-                ImGuiIO const &io = ImGui::GetIO();
-                SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-                ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
+                m_registry->get_system<systems::RenderGUI>().update(m_renderer.get(), m_registry.get());
             }
         } catch (std::exception const &e) {
             m_logger->error("render system error: {}", e.what());
