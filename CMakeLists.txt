@@ -82,7 +82,7 @@ add_executable(custom_game_engine
         src/components/Animation.hpp
         src/systems/Animation.cpp
         src/systems/Animation.hpp
-        src/components/BoxColider.hpp
+        src/components/BoxCollider.hpp
         src/systems/Collision.cpp
         src/systems/Collision.hpp
         src/systems/RenderCollision.cpp

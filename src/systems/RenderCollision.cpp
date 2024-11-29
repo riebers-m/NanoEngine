@@ -7,13 +7,13 @@
 #include <SDL_render.h>
 
 #include "common/Commons.hpp"
-#include "components/BoxColider.hpp"
+#include "components/BoxCollider.hpp"
 #include "components/Transform.hpp"
 
 namespace systems {
     RenderCollision::RenderCollision(Logger logger) : m_logger{logger} {
         require_component<component::Transform>();
-        require_component<component::BoxColider>();
+        require_component<component::BoxCollider>();
     }
 
     void RenderCollision::update(SDL_Renderer *renderer, SDL_Rect const &camera) {
@@ -27,7 +27,7 @@ namespace systems {
         for (auto itr = entities.begin(); itr != entities.end(); ++itr) {
             auto const a = *itr;
             auto const transform_a = a.get_component<component::Transform>();
-            auto const collider_a = a.get_component<component::BoxColider>();
+            auto const collider_a = a.get_component<component::BoxCollider>();
 
             if (std::ranges::find(already_drawn, a.get_id()) != already_drawn.end()) {
                 continue;
@@ -41,7 +41,7 @@ namespace systems {
             for (auto j = itr + 1; j != entities.end(); ++j) {
                 auto const b = *j;
                 auto const transform_b = b.get_component<component::Transform>();
-                auto const collider_b = b.get_component<component::BoxColider>();
+                auto const collider_b = b.get_component<component::BoxCollider>();
 
                 if (engine::Commons::AABB_collision_check(
                             transform_a.position.x + collider_a.offset.x, transform_a.position.y + collider_a.offset.y,

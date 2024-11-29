@@ -4,7 +4,7 @@
 
 #include "Collision.hpp"
 #include "common/Commons.hpp"
-#include "components/BoxColider.hpp"
+#include "components/BoxCollider.hpp"
 #include "components/Transform.hpp"
 #include "eventBus/EventBus.hpp"
 #include "events/Collision.hpp"
@@ -12,7 +12,7 @@
 namespace systems {
     Collision::Collision(Logger logger) : m_logger{logger} {
         require_component<component::Transform>();
-        require_component<component::BoxColider>();
+        require_component<component::BoxCollider>();
     }
     void Collision::update(events::EventBus *event_bus) {
 
@@ -22,7 +22,7 @@ namespace systems {
         for (auto itr = entities.begin(); itr != entities.end(); ++itr) {
             ecs::Entity a = *itr;
             auto const transform_a = a.get_component<component::Transform>();
-            auto const collider_a = a.get_component<component::BoxColider>();
+            auto const collider_a = a.get_component<component::BoxCollider>();
 
             for (auto j = itr + 1; j != entities.end(); ++j) {
                 ecs::Entity b = *j;
@@ -30,7 +30,7 @@ namespace systems {
                     continue;
                 }
                 auto const transform_b = b.get_component<component::Transform>();
-                auto const collider_b = b.get_component<component::BoxColider>();
+                auto const collider_b = b.get_component<component::BoxCollider>();
 
                 if (engine::Commons::AABB_collision_check(
                             transform_a.position.x + collider_a.offset.x, transform_a.position.y + collider_a.offset.y,

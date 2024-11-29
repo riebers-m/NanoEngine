@@ -5,7 +5,7 @@
 #include "ProjectileEmitter.hpp"
 #include "components/ProjectileEmitter.hpp"
 
-#include "components/BoxColider.hpp"
+#include "components/BoxCollider.hpp"
 #include "components/CameraFollow.hpp"
 #include "components/Projectile.hpp"
 #include "components/RigidBody.hpp"
@@ -40,7 +40,7 @@ namespace systems {
                 projectile.add_component<component::Transform>(projectile_position, transform.scale,
                                                                transform.rotation);
                 projectile.add_component<component::RigidBody>(projectile_emitter.velocity);
-                projectile.add_component<component::BoxColider>(4, 4);
+                projectile.add_component<component::BoxCollider>(4, 4);
                 projectile.add_component<component::Sprite>("bullet-image", 4, 4, 4);
                 projectile.add_component<component::Projectile>(
                         projectile_emitter.attitude, projectile_emitter.percentDamage, projectile_emitter.duration);
@@ -86,7 +86,7 @@ namespace systems {
                     }
 
                     projectile.add_component<component::RigidBody>(projectile_emitter.velocity * direction);
-                    projectile.add_component<component::BoxColider>(4, 4);
+                    projectile.add_component<component::BoxCollider>(4, 4);
                     projectile.add_component<component::Sprite>("bullet-image", 4, 4, 4);
                     projectile.add_component<component::Projectile>(
                             projectile_emitter.attitude, projectile_emitter.percentDamage, projectile_emitter.duration);

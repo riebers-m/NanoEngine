@@ -20,7 +20,7 @@ namespace systems {
     public:
         explicit RenderGUI(Logger logger);
 
-        void update(SDL_Renderer *renderer, ecs::Registry *registry);
+        void update(SDL_Renderer *renderer, ecs::Registry *registry, SDL_Rect const &camera);
     };
 
 } // namespace systems

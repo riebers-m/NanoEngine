@@ -12,7 +12,7 @@
 #include "assetStore/AssetStore.hpp"
 #include "common/TileMapLoader.hpp"
 #include "components/Animation.hpp"
-#include "components/BoxColider.hpp"
+#include "components/BoxCollider.hpp"
 #include "components/CameraFollow.hpp"
 #include "components/Health.hpp"
 #include "components/KeyboardControlled.hpp"
@@ -144,7 +144,7 @@ namespace engine {
         chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
         chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
-        chopper.add_component<component::BoxColider>(32, 32);
+        chopper.add_component<component::BoxCollider>(32, 32);
         chopper.add_component<component::KeyboardControlled>(glm::vec2{0, -80}, glm::vec2{80, 0}, glm::vec2{0, 80},
                                                              glm::vec2{-80, 0});
         chopper.add_component<component::CameraFollow>();
@@ -165,7 +165,7 @@ namespace engine {
         tank.add_component<component::Transform>(glm::vec2{500.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
         tank.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
-        tank.add_component<component::BoxColider>(32, 32);
+        tank.add_component<component::BoxCollider>(32, 32);
         tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
                                                          component::ProjectileEmitter::Attitude::enemy, 10);
         tank.add_component<component::Health>();
@@ -174,7 +174,7 @@ namespace engine {
         truck.add_component<component::Transform>(glm::vec2{120.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
         truck.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
         truck.add_component<component::Sprite>("truck-image", 32, 32, 2);
-        truck.add_component<component::BoxColider>(32, 32);
+        truck.add_component<component::BoxCollider>(32, 32);
         truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
                                                           component::ProjectileEmitter::Attitude::enemy, 10);
         truck.add_component<component::Health>();
@@ -255,7 +255,7 @@ namespace engine {
             m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
-                m_registry->get_system<systems::RenderGUI>().update(m_renderer.get(), m_registry.get());
+                m_registry->get_system<systems::RenderGUI>().update(m_renderer.get(), m_registry.get(), m_camera);
             }
         } catch (std::exception const &e) {
             m_logger->error("render system error: {}", e.what());

@@ -4,13 +4,13 @@
 
 #include "Damage.hpp"
 
-#include "components/BoxColider.hpp"
+#include "components/BoxCollider.hpp"
 #include "components/Health.hpp"
 #include "components/Projectile.hpp"
 #include "eventBus/EventBus.hpp"
 
 namespace systems {
-    Damage::Damage(Logger logger) : m_logger{logger} { require_component<component::BoxColider>(); }
+    Damage::Damage(Logger logger) : m_logger{logger} { require_component<component::BoxCollider>(); }
     void Damage::subscribe_to_event(events::EventBus *event_bus) {
         event_bus->subscribe<events::Collision>([this](events::Collision &event) { on_collision(event); });
     }

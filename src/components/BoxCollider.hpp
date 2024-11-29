@@ -8,12 +8,12 @@
 
 #include "glm/vec2.hpp"
 namespace component {
-    struct BoxColider {
+    struct BoxCollider {
         uint16_t width;
         uint16_t height;
         glm::vec2 offset;
 
-        explicit BoxColider(int width = 0, int height = 0, glm::vec2 const &offset = {}) :
+        explicit BoxCollider(int width = 0, int height = 0, glm::vec2 const &offset = {}) :
             width{static_cast<uint16_t>(width)}, height{static_cast<uint16_t>(height)}, offset{offset} {}
     };
 } // namespace component
