@@ -5,6 +5,7 @@
 #include "RenderGUI.hpp"
 
 #include <SDL_render.h>
+#include <array>
 
 #include <chrono>
 #include "components/BoxCollider.hpp"
@@ -21,11 +22,7 @@ using namespace std::chrono_literals;
 
 namespace systems {
     RenderGUI::RenderGUI(Logger logger) : m_logger{logger} {}
-    void RenderGUI::update(SDL_Renderer *renderer, ecs::Registry *registry, SDL_Rect const &camera) {
-        ImGui_ImplSDLRenderer2_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-
+    void RenderGUI::update(ecs::Registry *registry, SDL_Rect const &camera) {
         auto constexpr window_flags = ImGuiWindowFlags_AlwaysAutoResize;
         if (ImGui::Begin("Spawn Enemies", nullptr, window_flags)) {
             static int pos_x = 0;
@@ -40,7 +37,6 @@ namespace systems {
             static float proj_speed = 100.0;
             static int proj_repeat = 10;
             static int proj_duration = 10;
-            std::array<const char *, 3> constexpr combo_items = {"Tank", "Truck", "Helicopter"};
             std::array<const char *, 3> constexpr sprite_names = {"tank-image", "truck-image", "chopper-image"};
             static int selected_index = 0;
 
@@ -120,10 +116,5 @@ namespace systems {
                         ImGui::GetIO().MousePos.y + camera.y);
         }
         ImGui::End();
-
-        ImGui::Render();
-        ImGuiIO const &io = ImGui::GetIO();
-        SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
     }
 } // namespace systems

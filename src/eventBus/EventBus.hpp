@@ -7,6 +7,7 @@
 #include <typeindex>
 
 #include "Event.hpp"
+#include "common/Logger.hpp"
 #include "spdlog/spdlog.h"
 
 namespace events {
@@ -36,7 +37,7 @@ namespace events {
 
 
     class EventBus {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
         using Subscribers = std::unordered_map<std::type_index, std::unique_ptr<HandlerList>>;
 
     private:

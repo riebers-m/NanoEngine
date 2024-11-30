@@ -8,10 +8,7 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
-
-namespace spdlog {
-    class logger;
-}
+#include "common/Logger.hpp"
 
 struct SDL_Renderer;
 struct SDL_Texture;
@@ -29,7 +26,7 @@ namespace engine {
     private:
         using Store = std::unordered_map<std::string, std::unique_ptr<SDL_Texture, TextureDeleter>>;
         using FontStore = std::unordered_map<std::string, std::unique_ptr<TTF_Font, FontDeleter>>;
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
         Logger m_logger;
         Store m_texture_store;

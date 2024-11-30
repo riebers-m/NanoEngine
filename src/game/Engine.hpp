@@ -4,12 +4,11 @@
 
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
+#include "common/Logger.hpp"
 #include "game/Game.hpp"
-#include "spdlog/spdlog.h"
 
 namespace engine {
-    using Logger = std::shared_ptr<spdlog::logger>;
-
+    // using Logger = std::shared_ptr<spdlog::logger>;
     class Engine {
     private:
         Engine();
@@ -23,7 +22,7 @@ namespace engine {
         Engine operator=(Engine &&) = delete;
 
         ~Engine();
-        static Game create(Logger logger, Engine const & = instance());
+        static Game create(std::shared_ptr<Logger> logger, Engine const & = instance());
     };
 
 } // namespace engine

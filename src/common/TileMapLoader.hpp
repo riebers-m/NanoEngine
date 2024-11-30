@@ -5,15 +5,12 @@
 #ifndef TILEMAPLOADER_HPP
 #define TILEMAPLOADER_HPP
 #include <filesystem>
-
-namespace spdlog {
-    class logger;
-}
+#include "common/Logger.hpp"
 
 namespace engine {
     using IndexContainer = std::vector<std::vector<int>>;
     class TileMapLoader {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
         Logger m_logger;

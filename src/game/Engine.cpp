@@ -28,7 +28,7 @@ namespace engine {
         return eng;
     }
 
-    Game Engine::create(Logger logger, Engine const &) {
+    Game Engine::create(std::shared_ptr<Logger> logger, Engine const &) {
         SDL_DisplayMode display_mode;
         if (SDL_GetCurrentDisplayMode(0, &display_mode) < 0) {
             throw std::runtime_error(std::format("could not get display mode: {}", SDL_GetError()));
@@ -53,7 +53,6 @@ namespace engine {
         //     SDL_GetError()));
         // }
 
-        logger->set_level(spdlog::level::debug);
         return Game{window, renderer, logger, config};
     }
 } // namespace engine

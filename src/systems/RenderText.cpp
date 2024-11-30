@@ -3,6 +3,7 @@
 //
 
 #include "RenderText.hpp"
+#include <functional>
 #include "assetStore/AssetStore.hpp"
 #include "components/TextLabel.hpp"
 
@@ -26,7 +27,8 @@ void systems::RenderText::update(SDL_Renderer *renderer, engine::AssetStore *ass
                 int label_height = 0;
 
                 if (SDL_QueryTexture(texture.get(), nullptr, nullptr, &label_width, &label_height) != 0) {
-                    m_logger->error("query texture {} failed: {}", text_label.asset_id, SDL_GetError());
+                    // TODO
+                    // m_logger->error("query texture {} failed: {}", text_label.asset_id, SDL_GetError());
                     return;
                 }
 

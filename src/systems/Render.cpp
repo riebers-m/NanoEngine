@@ -52,13 +52,14 @@ void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore co
                 // NULL center point uses w/2 and h/2
                 if (SDL_RenderCopyEx(renderer, asset_store->get_texture(sprite.asset_id), &src_rect, &dest_rect,
                                      transform.rotation, nullptr, SDL_FLIP_NONE) != 0) {
-                    m_logger->error("rendering failed for asset id {}: {}", sprite.asset_id, SDL_GetError());
+                    // TODO
+                    // m_logger->error("rendering failed for asset id {}: {}", sprite.asset_id, SDL_GetError());
                 }
             } catch (std::out_of_range const &e) {
-                m_logger->error("rendering out of range for asset id {}: {}", sprite.asset_id, e.what());
+                // m_logger->error("rendering out of range for asset id {}: {}", sprite.asset_id, e.what());
             }
         }
     } catch (std::exception const &e) {
-        m_logger->error("render system error: {}", e.what());
+        // m_logger->error("render system error: {}", e.what());
     }
 }

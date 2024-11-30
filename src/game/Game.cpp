@@ -74,7 +74,6 @@ namespace engine {
     }
 
     void Game::setup() {
-        m_logger->info("ms per frame: {}", engine::MILL_SEC_PER_FRAME.count());
         load_level(1);
 
         m_timer.start();
@@ -239,7 +238,7 @@ namespace engine {
         m_registry->get_system<systems::KeyboardMovement>().subscribe_to_event(m_event_bus.get());
 
         m_registry->update();
-        m_registry->get_system<systems::Movement>().update(dt);
+        m_registry->get_system<systems::Movement>().update(dt, m_config.map_width, m_config.map_height);
         m_registry->get_system<systems::ProjectileEmitter>().update();
         m_registry->get_system<systems::Collision>().update(m_event_bus.get());
         m_registry->get_system<systems::Animation>().update(dt);
@@ -255,10 +254,23 @@ namespace engine {
             m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
             if (draw_collsion_bb) {
                 m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
-                m_registry->get_system<systems::RenderGUI>().update(m_renderer.get(), m_registry.get(), m_camera);
+
+                ImGui_ImplSDLRenderer2_NewFrame();
+                ImGui_ImplSDL2_NewFrame();
+                ImGui::NewFrame();
+                m_registry->get_system<systems::RenderGUI>().update(m_registry.get(), m_camera);
+
+                // Render Debug console
+                m_logger->draw("Log Console");
+
+                ImGui::Render();
+                ImGuiIO const &io = ImGui::GetIO();
+                SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+                ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
             }
         } catch (std::exception const &e) {
-            m_logger->error("render system error: {}", e.what());
+            // TODO
+            // m_logger->error("render system error: {}", e.what());
         }
         SDL_RenderPresent(m_renderer.get());
     }

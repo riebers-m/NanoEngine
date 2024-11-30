@@ -6,7 +6,7 @@
 #define GAME_HPP
 #include <SDL_rect.h>
 #include <memory>
-#include <spdlog/spdlog.h>
+#include "common/Logger.hpp"
 
 #include "config/Configuration.hpp"
 #include "timer/Timer.hpp"
@@ -24,14 +24,15 @@ namespace engine {
     class AssetStore;
 
     class Game {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        // using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<Logger>;
 
     private:
         std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> m_window;
         std::unique_ptr<SDL_Renderer, void (*)(SDL_Renderer *)> m_renderer;
         bool m_is_running;
         Timer m_timer;
-        std::shared_ptr<spdlog::logger> m_logger;
+        Logger m_logger;
         std::unique_ptr<ecs::Registry> m_registry;
         std::unique_ptr<AssetStore> m_asset_store;
         std::unique_ptr<events::EventBus> m_event_bus;

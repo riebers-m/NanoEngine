@@ -12,7 +12,7 @@
 namespace systems {
 
     class RenderGUI : public ecs::System {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
         Logger m_logger;
@@ -20,7 +20,7 @@ namespace systems {
     public:
         explicit RenderGUI(Logger logger);
 
-        void update(SDL_Renderer *renderer, ecs::Registry *registry, SDL_Rect const &camera);
+        void update(ecs::Registry *registry, SDL_Rect const &camera);
     };
 
 } // namespace systems

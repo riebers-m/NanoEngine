@@ -6,8 +6,6 @@
 #define RENDERTEXT_HPP
 
 #include <SDL_rect.h>
-
-
 #include "ECS/ECS.hpp"
 
 namespace engine {
@@ -18,7 +16,7 @@ struct SDL_Renderer;
 
 namespace systems {
     class RenderText : public ecs::System {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
         Logger m_logger;

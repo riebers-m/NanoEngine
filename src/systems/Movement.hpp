@@ -8,7 +8,7 @@
 
 namespace systems {
     class Movement : public ecs::System {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
         Logger m_logger;
@@ -16,7 +16,7 @@ namespace systems {
     public:
         explicit Movement(Logger);
 
-        void update(float dt);
+        void update(float dt, std::uint16_t map_width, std::uint16_t map_height);
     };
 } // namespace systems
 #endif // MOVEMENT_HPP

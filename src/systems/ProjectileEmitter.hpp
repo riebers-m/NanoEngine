@@ -13,7 +13,7 @@ namespace events {
 namespace systems {
 
     class ProjectileEmitter : public ecs::System {
-        using Logger = std::shared_ptr<spdlog::logger>;
+        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
         Logger m_logger;

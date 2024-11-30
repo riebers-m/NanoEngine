@@ -6,6 +6,7 @@
 
 #include <SDL_ttf.h>
 
+#include <functional>
 #include "assetStore/AssetStore.hpp"
 #include "components/Health.hpp"
 #include "components/Sprite.hpp"
@@ -42,7 +43,8 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
                 int label_height = 0;
 
                 if (SDL_QueryTexture(texture.get(), nullptr, nullptr, &label_width, &label_height) < 0) {
-                    m_logger->error("query texture failed: {}", SDL_GetError());
+                    // TODO
+                    // m_logger->error("query texture failed: {}", SDL_GetError());
                     return;
                 }
                 auto const sprite = entity.get_component<component::Sprite>();
