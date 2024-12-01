@@ -25,6 +25,7 @@ namespace engine {
     std::filesystem::path const CHOPPER_SPRITESHEET = IMAGES_PATH / "chopper-spritesheet.png";
     std::filesystem::path const RADAR = IMAGES_PATH / "radar.png";
     std::filesystem::path const BULLET = IMAGES_PATH / "bullet.png";
+    std::filesystem::path const TREE = IMAGES_PATH / "tree.png";
 
     std::filesystem::path const JUNGLE_INDEX_MAP = TILEMAPS_PATH / "jungle.map";
 

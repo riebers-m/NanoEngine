@@ -103,6 +103,7 @@ namespace engine {
         m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
         m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
         m_asset_store->add_texture(m_renderer.get(), "bullet-image", engine::BULLET);
+        m_asset_store->add_texture(m_renderer.get(), "tree-image", engine::TREE);
         m_asset_store->add_font("charriot-h1", engine::CHARRIOT_FONT, 20);
         m_asset_store->add_font("charriot-text", engine::CHARRIOT_FONT, 14);
 
@@ -162,11 +163,11 @@ namespace engine {
         auto tank = m_registry->create_entity();
         tank.group("enemies");
         tank.add_component<component::Transform>(glm::vec2{500.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
-        tank.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
+        tank.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
         tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
         tank.add_component<component::BoxCollider>(32, 32);
-        tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
-                                                         component::ProjectileEmitter::Attitude::enemy, 10);
+        // tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
+        //                                                  component::ProjectileEmitter::Attitude::enemy, 10);
         tank.add_component<component::Health>();
         auto truck = m_registry->create_entity();
         truck.group("enemies");
@@ -177,6 +178,24 @@ namespace engine {
         truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
                                                           component::ProjectileEmitter::Attitude::enemy, 10);
         truck.add_component<component::Health>();
+
+
+        {
+            ecs::Entity tree = m_registry->create_entity();
+            tree.group("obstacles");
+            tree.add_component<component::Transform>(glm::vec2{600.0, 495.0}, glm::vec2{1.0, 1.0}, 0.0);
+            tree.add_component<component::Sprite>("tree-image", 16, 32, 2);
+            tree.add_component<component::BoxCollider>(16, 32);
+        }
+
+
+        {
+            ecs::Entity tree = m_registry->create_entity();
+            tree.group("obstacles");
+            tree.add_component<component::Transform>(glm::vec2{400.0, 495.0}, glm::vec2{1.0, 1.0}, 0.0);
+            tree.add_component<component::Sprite>("tree-image", 16, 32, 2);
+            tree.add_component<component::BoxCollider>(16, 32);
+        }
 
         auto label = m_registry->create_entity();
         SDL_Color white = {255, 255, 255};
@@ -236,6 +255,7 @@ namespace engine {
         m_registry->get_system<systems::Damage>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::ProjectileEmitter>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::KeyboardMovement>().subscribe_to_event(m_event_bus.get());
+        m_registry->get_system<systems::Movement>().subscribe_to_event(m_event_bus.get());
 
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt, m_config.map_width, m_config.map_height);

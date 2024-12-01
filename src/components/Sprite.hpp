@@ -15,6 +15,7 @@ namespace component {
         int width{};
         int height{};
         int z_index{};
+        SDL_RendererFlip flip;
         SDL_Rect src_rect{};
         WorldPosition position{WorldPosition::free};
 
@@ -22,7 +23,7 @@ namespace component {
         // the registry.add_component function)
         explicit Sprite(std::string asset_id_ = "", int width_ = 0, int height_ = 0, int z_index = 0,
                         WorldPosition position = WorldPosition::free, int src_rect_x_ = 0, int src_rect_y_ = 0) :
-            asset_id(std::move(asset_id_)), width(width_), height(height_), z_index{z_index},
+            asset_id(std::move(asset_id_)), width(width_), height(height_), z_index{z_index}, flip{SDL_FLIP_NONE},
             src_rect{src_rect_x_, src_rect_y_, width_, height_}, position{position} {}
     };
 } // namespace component

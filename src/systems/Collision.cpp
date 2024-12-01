@@ -36,12 +36,6 @@ namespace systems {
                             transform_a.position.x + collider_a.offset.x, transform_a.position.y + collider_a.offset.y,
                             collider_a.width, collider_a.height, transform_b.position.x + collider_b.offset.x,
                             transform_b.position.y + collider_b.offset.y, collider_b.width, collider_b.height)) {
-                    // m_logger->debug("collision between entity {} and entity {}", a.get_id(), b.get_id());
-                    // m_logger->debug("A: Pos {},{} Size {},{} Off {},{}\nB: Pos {},{} Size {},{} Off {},{}",
-                    // transform_a.position.x, transform_a.position.y, collider_a.width, collider_a.height,
-                    //                 collider_a.offset.x, collider_a.offset.y, transform_b.position.x,
-                    //                 transform_b.position.y, collider_b.width, collider_b.height, collider_b.offset.x,
-                    //                 collider_b.offset.y);
 
                     event_bus->emit<events::Collision>(a, b);
                 }
