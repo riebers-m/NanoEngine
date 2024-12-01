@@ -27,6 +27,18 @@ void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore co
         for (auto const entity: get_entities()) {
             auto const transform = entity.get_component<component::Transform>();
             auto const sprite = entity.get_component<component::Sprite>();
+
+            // bypass rendering entities if they are outside the camera view
+            bool const is_entity_outside_camera_view =
+                    (transform.position.x + transform.scale.x * static_cast<float>(sprite.width) <
+                             static_cast<float>(camera.x) ||
+                     transform.position.x > static_cast<float>(camera.x + camera.w) ||
+                     transform.position.y + transform.scale.y * static_cast<float>(sprite.height) <
+                             static_cast<float>(camera.y) ||
+                     transform.position.y > static_cast<float>(camera.y + camera.h));
+            if (is_entity_outside_camera_view && sprite.position == component::WorldPosition::free) {
+                continue;
+            }
             renderables.emplace_back(transform, sprite);
         }
 
