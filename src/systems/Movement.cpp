@@ -53,6 +53,7 @@ namespace systems {
             for (auto entity: get_entities()) {
                 auto &transform = entity.get_component<component::Transform>();
                 auto const rigid_body = entity.get_component<component::RigidBody>();
+                auto const sprite = entity.get_component<component::Sprite>();
 
                 bool const is_outside_map = (transform.position.x < 0 || transform.position.x > map_width ||
                                              transform.position.y < 0 || transform.position.y > map_height);
@@ -60,8 +61,20 @@ namespace systems {
                     entity.kill();
                     continue;
                 }
-
                 transform.position += (rigid_body.velocity * dt);
+
+                if (entity.has_tag("player")) {
+                    transform.position.x = (transform.position.x < 0) ? 0 : transform.position.x;
+                    transform.position.x =
+                            (transform.position.x + static_cast<float>(sprite.width) >= static_cast<float>(map_width))
+                                    ? static_cast<float>(map_width - sprite.width)
+                                    : transform.position.x;
+                    transform.position.y = (transform.position.y < 0) ? 0 : transform.position.y;
+                    transform.position.y =
+                            (transform.position.y + static_cast<float>(sprite.height) >= static_cast<float>(map_height))
+                                    ? static_cast<float>(map_height - sprite.height)
+                                    : transform.position.y;
+                }
             }
         } catch (std::exception const &e) {
             m_logger->error("Movement system could not update: {}", e.what());
