@@ -4,28 +4,18 @@
 
 #include "game/Game.hpp"
 #include <SDL.h>
-#include <glm/glm.hpp>
 #include <thread>
 
 #include <chrono>
 #include "ECS/ECS.hpp"
 #include "assetStore/AssetStore.hpp"
-#include "common/TileMapLoader.hpp"
-#include "components/Animation.hpp"
-#include "components/BoxCollider.hpp"
-#include "components/CameraFollow.hpp"
-#include "components/Health.hpp"
-#include "components/KeyboardControlled.hpp"
-#include "components/ProjectileEmitter.hpp"
-#include "components/RigidBody.hpp"
-#include "components/Sprite.hpp"
-#include "components/TextLabel.hpp"
-#include "components/Transform.hpp"
+
 #include "config/Configuration.hpp"
 #include "const/Const.hpp"
 #include "eventBus/EventBus.hpp"
 #include "events/KeyPressedEvent.hpp"
 
+#include "common/LevelLoader.hpp"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
@@ -74,15 +64,6 @@ namespace engine {
     }
 
     void Game::setup() {
-        load_level(1);
-
-        m_timer.start();
-        // Initialize IMGUI
-        ImGui::CreateContext();
-        ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
-        ImGui_ImplSDLRenderer2_Init(m_renderer.get());
-    }
-    void Game::load_level(std::size_t level) {
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
         m_registry->add_system<systems::Animation>(m_logger);
@@ -97,111 +78,14 @@ namespace engine {
         m_registry->add_system<systems::HealthBar>(m_logger);
         m_registry->add_system<systems::RenderGUI>(m_logger);
 
-        m_asset_store->add_texture(m_renderer.get(), {"tank-image"}, engine::TANK_RIGHT);
-        m_asset_store->add_texture(m_renderer.get(), {"truck-image"}, engine::TRUCK_RIGHT);
-        m_asset_store->add_texture(m_renderer.get(), "tilemap", engine::JUNGLE_MAP);
-        m_asset_store->add_texture(m_renderer.get(), "chopper-image", engine::CHOPPER_SPRITESHEET);
-        m_asset_store->add_texture(m_renderer.get(), "radar-image", engine::RADAR);
-        m_asset_store->add_texture(m_renderer.get(), "bullet-image", engine::BULLET);
-        m_asset_store->add_texture(m_renderer.get(), "tree-image", engine::TREE);
-        m_asset_store->add_font("charriot-h1", engine::CHARRIOT_FONT, 20);
-        m_asset_store->add_font("charriot-text", engine::CHARRIOT_FONT, 14);
+        LevelLoader level_loader;
+        m_config = level_loader.load_level(m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
 
-        TileMapLoader loader{m_logger};
-        loader.load_index_map(engine::JUNGLE_INDEX_MAP);
-
-        auto row = 0;
-        auto col = 0;
-        auto const scale = 2.0;
-        for (auto const &index_row: loader) {
-            col = 0;
-            for (auto const map_index: index_row) {
-                auto tile = m_registry->create_entity();
-                tile.add_component<component::Transform>(
-                        glm::vec2{engine::TILE_SIZE * col * scale, engine::TILE_SIZE * row * scale},
-                        glm::vec2{scale, scale});
-                auto const src_X = map_index % engine::JUNGLE_MAP_COLS;
-                auto const src_Y = map_index / engine::JUNGLE_MAP_COLS;
-
-                if (src_Y >= engine::JUNGLE_MAP_ROWS) {
-                    throw std::runtime_error(
-                            std::format("invalid y index ({}) for tile with index {}", src_Y, map_index));
-                }
-                tile.group("tiles");
-                tile.add_component<component::Sprite>("tilemap", engine::TILE_SIZE, engine::TILE_SIZE, 0,
-                                                      component::WorldPosition::free, engine::TILE_SIZE * src_X,
-                                                      engine::TILE_SIZE * src_Y);
-                ++col;
-            }
-            ++row;
-        }
-        m_config.map_width = static_cast<size_t>(loader.map_width() * loader.tile_size() * scale);
-        m_config.map_height = static_cast<size_t>(loader.map_height() * loader.tile_size() * scale);
-
-        auto chopper = m_registry->create_entity();
-        chopper.tag("player");
-        chopper.add_component<component::Transform>(glm::vec2{240.0, 110.0}, glm::vec2{1.0, 1.0}, 0.0);
-        chopper.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
-        chopper.add_component<component::Sprite>("chopper-image", 32, 32, 1);
-        chopper.add_component<component::Animation>(2, 15, component::animate::infinite);
-        chopper.add_component<component::BoxCollider>(32, 32);
-        chopper.add_component<component::KeyboardControlled>(glm::vec2{0, -80}, glm::vec2{80, 0}, glm::vec2{0, 80},
-                                                             glm::vec2{-80, 0});
-        chopper.add_component<component::CameraFollow>();
-        chopper.add_component<component::Health>();
-        chopper.add_component<component::ProjectileEmitter>(glm::vec2{120.0, 120.0}, 0s, 10s,
-                                                            component::ProjectileEmitter::Attitude::friendly, 10,
-                                                            component::ProjectileEmitter::Repeater::manual);
-
-        auto radar = m_registry->create_entity();
-        radar.add_component<component::Transform>(glm::vec2{m_config.window_width - 74, 10.0}, glm::vec2{1.0, 1.0},
-                                                  0.0);
-        radar.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
-        radar.add_component<component::Sprite>("radar-image", 64, 64, 2, component::WorldPosition::fixed);
-        radar.add_component<component::Animation>(8, 10, component::animate::infinite);
-
-        auto tank = m_registry->create_entity();
-        tank.group("enemies");
-        tank.add_component<component::Transform>(glm::vec2{500.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
-        tank.add_component<component::RigidBody>(glm::vec2{20.0, 0.0});
-        tank.add_component<component::Sprite>("tank-image", 32, 32, 2);
-        tank.add_component<component::BoxCollider>(32, 32);
-        // tank.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 100.0}, 5s, 3s,
-        //                                                  component::ProjectileEmitter::Attitude::enemy, 10);
-        tank.add_component<component::Health>();
-        auto truck = m_registry->create_entity();
-        truck.group("enemies");
-        truck.add_component<component::Transform>(glm::vec2{120.0, 500.0}, glm::vec2{1.0, 1.0}, 0.0);
-        truck.add_component<component::RigidBody>(glm::vec2{0.0, 0.0});
-        truck.add_component<component::Sprite>("truck-image", 32, 32, 2);
-        truck.add_component<component::BoxCollider>(32, 32);
-        truck.add_component<component::ProjectileEmitter>(glm::vec2{0.0, 80.0}, 3s, 3s,
-                                                          component::ProjectileEmitter::Attitude::enemy, 10);
-        truck.add_component<component::Health>();
-
-
-        {
-            ecs::Entity tree = m_registry->create_entity();
-            tree.group("obstacles");
-            tree.add_component<component::Transform>(glm::vec2{600.0, 495.0}, glm::vec2{1.0, 1.0}, 0.0);
-            tree.add_component<component::Sprite>("tree-image", 16, 32, 2);
-            tree.add_component<component::BoxCollider>(16, 32);
-        }
-
-
-        {
-            ecs::Entity tree = m_registry->create_entity();
-            tree.group("obstacles");
-            tree.add_component<component::Transform>(glm::vec2{400.0, 495.0}, glm::vec2{1.0, 1.0}, 0.0);
-            tree.add_component<component::Sprite>("tree-image", 16, 32, 2);
-            tree.add_component<component::BoxCollider>(16, 32);
-        }
-
-        auto label = m_registry->create_entity();
-        SDL_Color white = {255, 255, 255};
-        SDL_Color green = {0, 255, 0};
-        label.add_component<component::TextLabel>(glm::vec2{m_config.window_width / 2 - 40, 10}, "CHOPPER v1.0",
-                                                  "charriot-h1", green);
+        m_timer.start();
+        // Initialize IMGUI
+        ImGui::CreateContext();
+        ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
+        ImGui_ImplSDLRenderer2_Init(m_renderer.get());
     }
 
     float Game::variable_time() {

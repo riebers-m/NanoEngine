@@ -43,7 +43,6 @@ namespace engine {
         void update(float dt);
         void render() const;
         void setup();
-        void load_level(std::size_t level);
 
         float variable_time(); // pixels per time
         float fixed_time(); // pixels per frame

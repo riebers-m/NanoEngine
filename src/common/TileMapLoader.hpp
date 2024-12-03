@@ -5,20 +5,17 @@
 #ifndef TILEMAPLOADER_HPP
 #define TILEMAPLOADER_HPP
 #include <filesystem>
-#include "common/Logger.hpp"
 
 namespace engine {
     using IndexContainer = std::vector<std::vector<int>>;
     class TileMapLoader {
-        using Logger = std::shared_ptr<engine::Logger>;
 
     private:
-        Logger m_logger;
         IndexContainer m_index_map;
         int m_tile_size;
 
     public:
-        explicit TileMapLoader(Logger logger, int tile_size = 32);
+        explicit TileMapLoader(int tile_size = 32);
 
         void load_index_map(std::filesystem::path const &path);
         [[nodiscard]] size_t tile_size() const;

@@ -7,8 +7,7 @@
 #include "spdlog/logger.h"
 
 namespace engine {
-    TileMapLoader::TileMapLoader(Logger logger, int tile_size) :
-        m_logger{logger}, m_index_map{}, m_tile_size{tile_size} {}
+    TileMapLoader::TileMapLoader(int tile_size) : m_index_map{}, m_tile_size{tile_size} {}
 
     void TileMapLoader::load_index_map(std::filesystem::path const &path) {
         std::ifstream file{path.string()};
