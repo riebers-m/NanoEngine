@@ -38,6 +38,12 @@ CPMAddPackage(
         VERSION 1.14.1
 )
 
+CPMAddPackage(
+        NAME cpptrace
+        GITHUB_REPOSITORY jeremy-rifkin/cpptrace
+        VERSION 0.7.3
+)
+
 set(IMGUI_SRC
         libs/imgui-1913/imconfig.h
         libs/imgui-1913/imgui.cpp
@@ -133,6 +139,7 @@ target_link_libraries(custom_game_engine
         sol2::sol2
         glm::glm
         spdlog::spdlog_header_only
+        cpptrace::cpptrace
 )
 target_include_directories(custom_game_engine PRIVATE libs/imgui-1913 libs/imgui-1913/backends src)
 

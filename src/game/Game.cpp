@@ -152,30 +152,28 @@ namespace engine {
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);
         SDL_RenderClear(m_renderer.get());
-        try {
-            m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
-            m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
-            m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
-            if (draw_collsion_bb) {
-                m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
 
-                ImGui_ImplSDLRenderer2_NewFrame();
-                ImGui_ImplSDL2_NewFrame();
-                ImGui::NewFrame();
-                m_registry->get_system<systems::RenderGUI>().update(m_registry.get(), m_camera);
+        m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
+        m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
+        m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
+#if _DEBUG
+        if (draw_collsion_bb) {
+            m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
 
-                // Render Debug console
-                m_logger->draw("Log Console");
+            ImGui_ImplSDLRenderer2_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
+            m_registry->get_system<systems::RenderGUI>().update(m_registry.get(), m_camera);
 
-                ImGui::Render();
-                ImGuiIO const &io = ImGui::GetIO();
-                SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-                ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
-            }
-        } catch (std::exception const &e) {
-            // TODO
-            // m_logger->error("render system error: {}", e.what());
+            // Render Debug console
+            m_logger->draw("Log Console");
+
+            ImGui::Render();
+            ImGuiIO const &io = ImGui::GetIO();
+            SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
         }
+#endif // _DEBUG
         SDL_RenderPresent(m_renderer.get());
     }
 } // namespace engine

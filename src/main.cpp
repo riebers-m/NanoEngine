@@ -1,3 +1,4 @@
+#include <cpptrace/from_current.hpp>
 #include "common/ImGuiLogWindow.hpp"
 #include "common/SpdlogLogger.hpp"
 #include "const/Const.hpp"
@@ -12,14 +13,16 @@ int main(int argc, char *argv[]) {
 
     // Use ImGui Debug console
     auto logger = std::make_shared<engine::Logger>(std::make_unique<engine::ImGuiLogWindow>());
-    try {
+
+    CPPTRACE_TRY {
         engine::Game game = engine::Engine::create(logger);
 
         game.run();
         return 0;
-
-    } catch (std::exception const &e) {
+    }
+    CPPTRACE_CATCH(std::exception const &e) {
         logger->error(e.what());
+        cpptrace::from_current_exception().print();
         return 1;
     }
 }
