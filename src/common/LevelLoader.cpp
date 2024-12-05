@@ -22,13 +22,17 @@
 using namespace std::chrono_literals;
 
 namespace engine {
-    Configuration LevelLoader::load_level(ecs::Registry *registry, engine::AssetStore *asset_store,
+    Configuration LevelLoader::load_level(sol::state &lua, ecs::Registry *registry, engine::AssetStore *asset_store,
                                           SDL_Renderer *renderer, int level) {
-        sol::state lua{};
-        lua.open_libraries(sol::lib::base);
-
-        Configuration config{};
         auto const script_path = engine::ASSET_PATH / "scripts" / std::format("level{}.lua", level);
+        sol::load_result const script = lua.load_file(script_path.string());
+
+        if (!script.valid()) {
+            sol::error err = script;
+            throw std::runtime_error(
+                    std::format("could not load script: {} - message: {}", script_path.string(), err.what()));
+        }
+        Configuration config{};
         lua.script_file(script_path.string());
         // Load entities and compontens from lua script
 

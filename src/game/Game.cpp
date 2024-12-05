@@ -36,19 +36,22 @@
 using namespace std::chrono_literals;
 
 namespace engine {
-    static bool draw_collsion_bb = true;
+    static bool debug_overlay = true;
+    static ImGuiContext *imgui_context{nullptr};
 
     Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, Configuration const &config) :
-        m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }),
-        m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }), m_is_running(true), m_timer{},
-        m_logger(logger), m_registry{std::make_unique<ecs::Registry>(logger)},
-        m_asset_store{std::make_unique<AssetStore>(logger)}, m_event_bus{std::make_unique<events::EventBus>(m_logger)},
-        m_config{config}, m_camera{0, 0, config.window_width, config.window_height} {}
+        m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }),
+        m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }), m_is_running(true), m_timer{}, m_logger(logger),
+        m_registry{std::make_unique<ecs::Registry>(logger)}, m_asset_store{std::make_unique<AssetStore>(logger)},
+        m_event_bus{std::make_unique<events::EventBus>(m_logger)}, m_config{config},
+        m_camera{0, 0, config.window_width, config.window_height} {}
 
     Game::~Game() {
-        ImGui_ImplSDLRenderer2_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
+        if (imgui_context) {
+            ImGui_ImplSDLRenderer2_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
+            ImGui::DestroyContext();
+        }
     }
 
     void Game::run() {
@@ -64,6 +67,11 @@ namespace engine {
     }
 
     void Game::setup() {
+        // Initialize IMGUI
+        imgui_context = ImGui::CreateContext();
+        ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
+        ImGui_ImplSDLRenderer2_Init(m_renderer.get());
+
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
         m_registry->add_system<systems::Animation>(m_logger);
@@ -78,14 +86,12 @@ namespace engine {
         m_registry->add_system<systems::HealthBar>(m_logger);
         m_registry->add_system<systems::RenderGUI>(m_logger);
 
+        m_lua.open_libraries(sol::lib::base, sol::lib::math);
+
         LevelLoader level_loader;
-        m_config = level_loader.load_level(m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
+        m_config = level_loader.load_level(m_lua, m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
 
         m_timer.start();
-        // Initialize IMGUI
-        ImGui::CreateContext();
-        ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
-        ImGui_ImplSDLRenderer2_Init(m_renderer.get());
     }
 
     float Game::variable_time() {
@@ -123,7 +129,7 @@ namespace engine {
                         m_is_running = false;
                     }
                     if (evnt.key.keysym.sym == SDLK_d) {
-                        draw_collsion_bb = !draw_collsion_bb;
+                        debug_overlay = !debug_overlay;
                     }
                     m_event_bus->emit<events::KeyPressedEvent>(evnt.key.keysym.sym);
                 default:
@@ -157,7 +163,7 @@ namespace engine {
         m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
         m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
 #if _DEBUG
-        if (draw_collsion_bb) {
+        if (debug_overlay) {
             m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
 
             ImGui_ImplSDLRenderer2_NewFrame();

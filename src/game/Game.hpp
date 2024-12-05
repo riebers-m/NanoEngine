@@ -6,6 +6,8 @@
 #define GAME_HPP
 #include <SDL_rect.h>
 #include <memory>
+#include <sol/state.hpp>
+
 #include "common/Logger.hpp"
 
 #include "config/Configuration.hpp"
@@ -28,8 +30,8 @@ namespace engine {
         using Logger = std::shared_ptr<Logger>;
 
     private:
-        std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> m_window;
         std::unique_ptr<SDL_Renderer, void (*)(SDL_Renderer *)> m_renderer;
+        std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> m_window;
         bool m_is_running;
         Timer m_timer;
         Logger m_logger;
@@ -38,6 +40,7 @@ namespace engine {
         std::unique_ptr<events::EventBus> m_event_bus;
         Configuration m_config;
         SDL_Rect m_camera;
+        sol::state m_lua;
 
         void process_input();
         void update(float dt);

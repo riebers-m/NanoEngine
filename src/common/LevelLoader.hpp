@@ -4,6 +4,9 @@
 
 #ifndef LEVELLOADER_HPP
 #define LEVELLOADER_HPP
+#include <sol/state.hpp>
+
+
 #include "config/Configuration.hpp"
 
 struct SDL_Renderer;
@@ -18,7 +21,8 @@ namespace engine {
 
     class LevelLoader {
     public:
-        Configuration load_level(ecs::Registry *, AssetStore *, SDL_Renderer *, int level);
+        [[nodiscard]] Configuration load_level(sol::state &lua, ecs::Registry *, AssetStore *, SDL_Renderer *,
+                                               int level);
     };
 
 } // namespace engine
