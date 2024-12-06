@@ -30,7 +30,7 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
         }
 
         if (std::unique_ptr<SDL_Surface, std::function<void(SDL_Surface * s)>> surface{
-                    TTF_RenderText_Blended(asset_store->get_font("charriot-text"),
+                    TTF_RenderText_Blended(asset_store->get_font("pico8-font-5"),
                                            std::format("{}%", health.health_percentage).c_str(), color),
                     [](SDL_Surface *s) { SDL_FreeSurface(s); }};
             surface != nullptr) {
@@ -43,8 +43,7 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
                 int label_height = 0;
 
                 if (SDL_QueryTexture(texture.get(), nullptr, nullptr, &label_width, &label_height) < 0) {
-                    // TODO
-                    // m_logger->error("query texture failed: {}", SDL_GetError());
+                    m_logger->error("query texture failed: {}", SDL_GetError());
                     return;
                 }
                 auto const sprite = entity.get_component<component::Sprite>();

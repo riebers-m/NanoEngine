@@ -28,7 +28,6 @@ void engine::AssetStore::add_texture(SDL_Renderer *renderer, std::string const &
             if (auto [_, ok] = m_texture_store.emplace(asset_id, texture); !ok) {
                 throw std::runtime_error(std::format("could not emplace texture {} in store", asset_id));
             }
-            m_logger->debug("new texture added with id {}", asset_id);
             return;
         }
     }
@@ -42,7 +41,6 @@ void engine::AssetStore::add_font(std::string const &asset_id, std::filesystem::
                                   std::size_t font_size) {
     if (TTF_Font *font = TTF_OpenFont(file_path.string().c_str(), static_cast<int>(font_size)); font != nullptr) {
         m_font_store.emplace(asset_id, font);
-        m_logger->debug("new font added with id {}", asset_id);
         return;
     }
     throw std::runtime_error(std::format("could not add font {}: {}", asset_id, TTF_GetError()));

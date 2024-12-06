@@ -3,8 +3,6 @@
 //
 
 #include "RenderGUI.hpp"
-
-#include <SDL_render.h>
 #include <array>
 
 #include <chrono>
@@ -15,8 +13,6 @@
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 #include "imgui.h"
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_sdlrenderer2.h"
 
 using namespace std::chrono_literals;
 
@@ -37,7 +33,7 @@ namespace systems {
             static float proj_speed = 100.0;
             static int proj_repeat = 10;
             static int proj_duration = 10;
-            std::array<const char *, 3> constexpr sprite_names = {"tank-image", "truck-image", "chopper-image"};
+            std::array constexpr sprite_names = {"tank-texture", "truck-texture", "chopper-texture"};
             static int selected_index = 0;
 
             // Input enemy sprite texture

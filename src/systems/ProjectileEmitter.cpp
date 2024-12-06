@@ -41,7 +41,7 @@ namespace systems {
                                                                transform.rotation);
                 projectile.add_component<component::RigidBody>(projectile_emitter.velocity);
                 projectile.add_component<component::BoxCollider>(4, 4);
-                projectile.add_component<component::Sprite>("bullet-image", 4, 4, 4);
+                projectile.add_component<component::Sprite>("bullet-texture", 4, 4, 4);
                 projectile.add_component<component::Projectile>(
                         projectile_emitter.attitude, projectile_emitter.percentDamage, projectile_emitter.duration);
 
@@ -55,7 +55,7 @@ namespace systems {
     void ProjectileEmitter::on_keypress(events::KeyPressedEvent &event) {
         if (event.keycode == SDLK_SPACE) {
             for (auto entity: get_entities()) {
-                if (entity.has_component<component::CameraFollow>()) {
+                if (entity.has_tag("player")) {
                     auto const projectile_emitter = entity.get_component<component::ProjectileEmitter>();
                     auto const transform = entity.get_component<component::Transform>();
                     auto const rigidbody = entity.get_component<component::RigidBody>();
@@ -87,7 +87,7 @@ namespace systems {
 
                     projectile.add_component<component::RigidBody>(projectile_emitter.velocity * direction);
                     projectile.add_component<component::BoxCollider>(4, 4);
-                    projectile.add_component<component::Sprite>("bullet-image", 4, 4, 4);
+                    projectile.add_component<component::Sprite>("bullet-texture", 4, 4, 4);
                     projectile.add_component<component::Projectile>(
                             projectile_emitter.attitude, projectile_emitter.percentDamage, projectile_emitter.duration);
                 }

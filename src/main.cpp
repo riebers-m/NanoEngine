@@ -4,6 +4,7 @@
 #include "common/SpdlogLogger.hpp"
 #include "const/Const.hpp"
 #include "game/Engine.hpp"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
 void trace() { cpptrace::generate_trace().print(); }

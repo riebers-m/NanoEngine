@@ -150,7 +150,6 @@ namespace ecs {
         using Signatures = std::vector<Signature>;
         using Systems = std::unordered_map<std::type_index, std::shared_ptr<System>>;
         using Entities = std::set<Entity>;
-        // using Logger = std::shared_ptr<spdlog::logger>;
         using Logger = std::shared_ptr<engine::Logger>;
 
     private:

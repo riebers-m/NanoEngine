@@ -86,9 +86,9 @@ namespace engine {
         m_registry->add_system<systems::HealthBar>(m_logger);
         m_registry->add_system<systems::RenderGUI>(m_logger);
 
-        m_lua.open_libraries(sol::lib::base, sol::lib::math);
+        m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
 
-        LevelLoader level_loader;
+        LevelLoader level_loader{m_logger};
         m_config = level_loader.load_level(m_lua, m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
 
         m_timer.start();

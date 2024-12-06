@@ -17,6 +17,24 @@ namespace component {
             manual,
         };
 
+        static Attitude string_to_attitude(std::string const &att) {
+            if (att.find("friendly") != std::string::npos) {
+                return Attitude::friendly;
+            } else if (att.find("enemy") != std::string::npos) {
+                return Attitude::enemy;
+            }
+            throw std::runtime_error(std::format("Could not convert projectile attitude: {}", att));
+        }
+
+        static Repeater string_to_repeater(std::string const &rep) {
+            if (rep.find("automatic") != std::string::npos) {
+                return Repeater::automatic;
+            } else if (rep.find("manual") != std::string::npos) {
+                return Repeater::manual;
+            }
+            throw std::runtime_error(std::format("Could not convert projectile repeater: {}", rep));
+        }
+
         glm::vec2 velocity;
         std::chrono::milliseconds repeat_frequence;
         std::chrono::milliseconds duration;

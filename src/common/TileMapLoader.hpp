@@ -7,7 +7,8 @@
 #include <filesystem>
 
 namespace engine {
-    using IndexContainer = std::vector<std::vector<int>>;
+    // using IndexContainer = std::vector<std::vector<int>>;
+    using IndexContainer = std::vector<std::vector<std::pair<int, int>>>;
     class TileMapLoader {
 
     private:
