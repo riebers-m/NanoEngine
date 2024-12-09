@@ -2851,16 +2851,16 @@ Level = {
                     projectile_duration = 1, -- secondsm
                     repeat_frequency = 1, -- seconds
                     hit_percentage_damage = 10,
-                    friendly = false
+                    attitude = "enemy"
                 },
                 on_update_script = {
                     [0] = function(entity, delta_time, ellapsed_time)
-                        -- print("Executing BF-109 Lua script!")
+                        print("Executing BF-109 Lua script!")
 
                         -- change the position of the the airplane to follow a sine wave movement
-                        local new_x = ellapsed_time * 0.09
-                        local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
-                        set_position(entity, new_x, new_y) -- set the new position
+                        --local new_x = ellapsed_time * 0.09
+                        --local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
+                        --set_position(entity, new_x, new_y) -- set the new position
                     end
                 }
             }

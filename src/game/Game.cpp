@@ -32,6 +32,7 @@
 #include "systems/RenderCollision.hpp"
 #include "systems/RenderGUI.hpp"
 #include "systems/RenderText.hpp"
+#include "systems/Script.hpp"
 
 using namespace std::chrono_literals;
 
@@ -44,9 +45,11 @@ namespace engine {
         m_window(window, [](SDL_Window *w) { SDL_DestroyWindow(w); }), m_is_running(true), m_timer{}, m_logger(logger),
         m_registry{std::make_unique<ecs::Registry>(logger)}, m_asset_store{std::make_unique<AssetStore>(logger)},
         m_event_bus{std::make_unique<events::EventBus>(m_logger)}, m_config{config},
-        m_camera{0, 0, config.window_width, config.window_height} {}
+        m_camera{0, 0, config.window_width, config.window_height}, m_lua{} {}
 
     Game::~Game() {
+        m_registry->clear();
+
         if (imgui_context) {
             ImGui_ImplSDLRenderer2_Shutdown();
             ImGui_ImplSDL2_Shutdown();
@@ -85,6 +88,7 @@ namespace engine {
         m_registry->add_system<systems::RenderText>(m_logger);
         m_registry->add_system<systems::HealthBar>(m_logger);
         m_registry->add_system<systems::RenderGUI>(m_logger);
+        m_registry->add_system<systems::Script>();
 
         m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
 
@@ -154,6 +158,7 @@ namespace engine {
         m_registry->get_system<systems::Animation>().update(dt);
         m_registry->get_system<systems::CameraMovement>().update(m_camera, m_config);
         m_registry->get_system<systems::ProjectileLifecycle>().update();
+        m_registry->get_system<systems::Script>().update();
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);

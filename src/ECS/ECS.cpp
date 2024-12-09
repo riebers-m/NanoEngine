@@ -43,12 +43,22 @@ void ecs::System::remove_entity(Entity entity) {
 ecs::System::Entities ecs::System::get_entities() const { return m_entities; }
 ecs::Signature ecs::System::get_signature() const { return m_component_signature; }
 
-ecs::Registry::Registry(Logger logger) :
-    m_entity_count{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
-    m_logger{logger}, m_free_ids{}, m_tag_per_entity{}, m_entity_per_tag{}, m_entity_groups{}, m_groupe_per_entity{} {}
 ///////////////////////////////////////////////////////////////////////////////////////////
 /// Registry
 ///////////////////////////////////////////////////////////////////////////////////////////
+ecs::Registry::Registry(Logger logger) :
+    m_entity_count{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
+    m_logger{logger}, m_free_ids{}, m_tag_per_entity{}, m_entity_per_tag{}, m_entity_groups{}, m_groupe_per_entity{} {}
+
+
+void ecs::Registry::clear() {
+    for (const auto &pool: m_components) {
+        if (pool) {
+            pool->clear();
+        }
+    }
+}
+
 ecs::Entity ecs::Registry::create_entity() {
     size_t entity_id{};
     if (m_free_ids.empty()) {

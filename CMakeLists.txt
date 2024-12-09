@@ -132,6 +132,9 @@ add_executable(custom_game_engine
         src/common/ImGuiLogWindow.cpp
         src/common/LevelLoader.cpp
         src/common/LevelLoader.hpp
+        src/components/Script.hpp
+        src/systems/Script.cpp
+        src/systems/Script.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

@@ -113,6 +113,7 @@ namespace ecs {
         virtual ~BasePool() = default;
 
         virtual void remove_entity(std::size_t entity_id) = 0;
+        virtual void clear() = 0;
     };
 
     template<typename T>
@@ -126,19 +127,19 @@ namespace ecs {
         std::unordered_map<std::size_t, std::size_t> m_index_to_entity;
 
     public:
-        explicit Pool(std::size_t capacity = 1000);
+        explicit Pool(std::size_t size = 1000);
         ~Pool() override = default;
 
         [[nodiscard]] bool is_empty() const;
         [[nodiscard]] std::size_t size() const;
         void resize(std::size_t new_size);
-        void clear();
+        void clear() override;
         void add(T const &);
         void set(std::size_t entity_id, T const &);
         void remove(std::size_t entity_id);
         void remove_entity(std::size_t entity_id) override;
-        T &get(std::size_t index);
-        T &operator[](std::size_t index);
+        [[nodiscard]] T &get(std::size_t entity_id);
+        [[nodiscard]] T &operator[](std::size_t index);
     };
 
 
@@ -179,6 +180,7 @@ namespace ecs {
     public:
         explicit Registry(Logger logger);
 
+        void clear();
         Entity create_entity();
         void remove_entity(Entity const &entity);
 
