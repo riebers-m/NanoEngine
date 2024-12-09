@@ -346,12 +346,10 @@ namespace ecs {
 
         if (component_id >= m_components.size()) {
             m_components.resize((m_components.size() + 1) * 2, nullptr);
-            m_logger->debug("resizing components vector to {}", m_components.size());
         }
 
         if (!m_components[component_id]) {
             m_components[component_id] = std::make_shared<Pool<T>>();
-            m_logger->debug("adding component pool {} with id {}", typeid(T).name(), component_id);
         }
 
         auto component_pool = std::static_pointer_cast<Pool<T>>(m_components[component_id]);
@@ -360,9 +358,6 @@ namespace ecs {
 
         component_pool->set(entity_id, new_component);
         m_signatures[entity_id].set(component_id);
-
-        m_logger->debug("component id {} was added to entity id {}", component_id, entity_id);
-        m_logger->debug("component id {} ---> pool size: {}", component_id, component_pool->size());
     }
     template<typename T>
     void Registry::remove_component(Entity const &entity) {
@@ -377,8 +372,6 @@ namespace ecs {
         component_pool->remove(entity_id);
 
         m_signatures[entity_id].set(component_id, false);
-
-        m_logger->debug("component id {} was removed to entity id {}", component_id, entity_id);
     }
 
     template<typename T>

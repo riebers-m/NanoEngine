@@ -2762,7 +2762,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 rigidbody = {
-                    velocity = { x = 0.0, y = -50.0 }
+                    velocity = { x = 0.0, y = -200.0 }
                 },
                 sprite = {
                     texture_asset_id = "su27-texture",
@@ -2786,40 +2786,34 @@ Level = {
                     projectile_duration = 5, -- seconds
                     repeat_frequency = 1, -- seconds
                     hit_percentage_damage = 10,
-                    friendly = false
                 },
                 on_update_script = {
                     [0] = function(entity, delta_time, ellapsed_time)
-                        print("Executing the SU-27 fighter jet Lua script!")
-
-                        --[[
                         -- this function makes the fighter jet move up and down the map shooting projectiles
-                        local current_position_x, current_position_y = get_position(entity)
-                        local current_velocity_x, current_velocity_y = get_velocity(entity)
+                        local current_position = get_position(entity)
+                        local current_velocity = get_velocity(entity)
 
                         -- if it reaches the top or the bottom of the map
-                        if current_position_y < 10 or current_position_y > map_height - 32 then
-                            set_velocity(entity, 0, current_velocity_y * -1); -- flip the entity y-velocity
-                        else
-                            set_velocity(entity, 0, current_velocity_y); -- do not flip y-velocity
+                        if current_position.y < 10 or current_position.y > map_height - 32 then
+                            current_velocity.y = current_velocity.y * -1
                         end
+                        set_velocity(entity, current_velocity);
 
                         -- set the transform rotation to match going up or down
-                        if (current_velocity_y < 0) then
+                        if (current_velocity.y < 0) then
                             set_rotation(entity, 0) -- point up
-                            set_projectile_velocity(entity, 0, -200) -- shoot projectiles up
+                            set_projectile_velocity(entity, vec2.new(0, -200)) -- shoot projectiles up
                         else
                             set_rotation(entity, 180) -- point down
-                            set_projectile_velocity(entity, 0, 200) -- shoot projectiles down
+                            set_projectile_velocity(entity, vec2.new(0, 200)) -- shoot projectiles down
                         end
-                        --]]
                     end
                 }
             }
         },
         {
             -- F-22 fighter jet
-            group = "enemies",
+            group = "FIGHTER",
             components = {
                 transform = {
                     position = { x = 10, y = 10 },
@@ -2851,16 +2845,14 @@ Level = {
                     projectile_duration = 1, -- secondsm
                     repeat_frequency = 1, -- seconds
                     hit_percentage_damage = 10,
-                    attitude = "enemy"
                 },
                 on_update_script = {
                     [0] = function(entity, delta_time, ellapsed_time)
-                        print("Executing BF-109 Lua script!")
-
                         -- change the position of the the airplane to follow a sine wave movement
-                        --local new_x = ellapsed_time * 0.09
-                        --local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
-                        --set_position(entity, new_x, new_y) -- set the new position
+                        local new_x = ellapsed_time * 0.09
+                        local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
+                        local new_vec = vec2.new(new_x, new_y)
+                        set_position(entity, new_vec) -- set the new position
                     end
                 }
             }

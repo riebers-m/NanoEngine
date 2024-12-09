@@ -70,12 +70,9 @@ ecs::Entity ecs::Registry::create_entity() {
 
     if (entity_id >= m_signatures.size()) {
         m_signatures.resize((m_signatures.size() + 1) * 2);
-        m_logger->debug("resizing signatures vector to {}", m_signatures.size());
     }
     auto const entity = Entity{entity_id, this};
     m_to_be_added_entities.insert(entity);
-
-    m_logger->debug("Entity created with id: {}", entity_id);
     return entity;
 }
 

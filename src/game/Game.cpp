@@ -37,8 +37,9 @@
 using namespace std::chrono_literals;
 
 namespace engine {
-    static bool debug_overlay = true;
+    static bool debug_overlay = false;
     static ImGuiContext *imgui_context{nullptr};
+    static Timer elapsed_time{};
 
     Game::Game(SDL_Window *window, SDL_Renderer *renderer, Logger logger, Configuration const &config) :
         m_renderer(renderer, [](SDL_Renderer *r) { SDL_DestroyRenderer(r); }),
@@ -58,6 +59,7 @@ namespace engine {
     }
 
     void Game::run() {
+        elapsed_time.start();
         setup();
 
         while (m_is_running) {
@@ -75,6 +77,8 @@ namespace engine {
         ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
         ImGui_ImplSDLRenderer2_Init(m_renderer.get());
 
+        m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
+
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
         m_registry->add_system<systems::Animation>(m_logger);
@@ -88,9 +92,8 @@ namespace engine {
         m_registry->add_system<systems::RenderText>(m_logger);
         m_registry->add_system<systems::HealthBar>(m_logger);
         m_registry->add_system<systems::RenderGUI>(m_logger);
-        m_registry->add_system<systems::Script>();
-
-        m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
+        m_registry->add_system<systems::Script>(m_logger);
+        m_registry->get_system<systems::Script>().create_lua_bindigs(m_lua);
 
         LevelLoader level_loader{m_logger};
         m_config = level_loader.load_level(m_lua, m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
@@ -132,7 +135,7 @@ namespace engine {
                     if (evnt.key.keysym.sym == SDLK_ESCAPE) {
                         m_is_running = false;
                     }
-                    if (evnt.key.keysym.sym == SDLK_d) {
+                    if (evnt.key.keysym.sym == SDLK_F1) {
                         debug_overlay = !debug_overlay;
                     }
                     m_event_bus->emit<events::KeyPressedEvent>(evnt.key.keysym.sym);
@@ -158,7 +161,7 @@ namespace engine {
         m_registry->get_system<systems::Animation>().update(dt);
         m_registry->get_system<systems::CameraMovement>().update(m_camera, m_config);
         m_registry->get_system<systems::ProjectileLifecycle>().update();
-        m_registry->get_system<systems::Script>().update();
+        m_registry->get_system<systems::Script>().update(dt, elapsed_time.round());
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);

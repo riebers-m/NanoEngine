@@ -7,12 +7,12 @@
 #include <sol/function.hpp>
 #include <utility>
 
-namespace components {
+namespace component {
     struct Script {
         sol::function func;
 
         explicit Script(sol::function func = sol::lua_nil) : func{std::move(func)} {}
     };
-} // namespace components
+} // namespace component
 
 #endif // SCRIPT_HPP
