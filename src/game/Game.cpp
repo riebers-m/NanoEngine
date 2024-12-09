@@ -96,7 +96,7 @@ namespace engine {
         m_registry->get_system<systems::Script>().create_lua_bindigs(m_lua);
 
         LevelLoader level_loader{m_logger};
-        m_config = level_loader.load_level(m_lua, m_registry.get(), m_asset_store.get(), m_renderer.get(), 1);
+        m_config = level_loader.load_level(m_lua, m_registry.get(), m_asset_store.get(), m_renderer.get(), 2);
 
         m_timer.start();
     }

@@ -2813,7 +2813,7 @@ Level = {
         },
         {
             -- F-22 fighter jet
-            group = "FIGHTER",
+            group = "enemies",
             components = {
                 transform = {
                     position = { x = 10, y = 10 },
