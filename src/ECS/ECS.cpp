@@ -47,8 +47,8 @@ ecs::Signature ecs::System::get_signature() const { return m_component_signature
 /// Registry
 ///////////////////////////////////////////////////////////////////////////////////////////
 ecs::Registry::Registry(Logger logger) :
-    m_entity_count{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
-    m_logger{logger}, m_free_ids{}, m_tag_per_entity{}, m_entity_per_tag{}, m_entity_groups{}, m_groupe_per_entity{} {}
+    m_Entitycount{}, m_to_be_added_entities{}, m_to_be_removed_entities{}, m_components{}, m_signatures{}, m_systems{},
+    m_logger{logger}, m_free_ids{}, m_tag_per_entity{}, m_Entityper_tag{}, m_Entitygroups{}, m_groupe_per_entity{} {}
 
 
 void ecs::Registry::clear() {
@@ -60,18 +60,18 @@ void ecs::Registry::clear() {
 }
 
 ecs::Entity ecs::Registry::create_entity() {
-    size_t entity_id{};
+    size_t Entityid{};
     if (m_free_ids.empty()) {
-        entity_id = m_entity_count++;
+        Entityid = m_Entitycount++;
     } else {
-        entity_id = m_free_ids.front();
+        Entityid = m_free_ids.front();
         m_free_ids.pop_front();
     }
 
-    if (entity_id >= m_signatures.size()) {
+    if (Entityid >= m_signatures.size()) {
         m_signatures.resize((m_signatures.size() + 1) * 2);
     }
-    auto const entity = Entity{entity_id, this};
+    auto const entity = Entity{Entityid, this};
     m_to_be_added_entities.insert(entity);
     return entity;
 }
@@ -81,31 +81,31 @@ void ecs::Registry::remove_entity(Entity const &entity) {
         throw std::runtime_error(std::format("could not add entity {} to removed entities", entity.get_id()));
     }
 }
-void ecs::Registry::add_entity_to_system(Entity const &entity) {
-    auto const entity_id = entity.get_id();
-    auto const entity_signatures = m_signatures[entity_id];
+void ecs::Registry::add_Entityto_system(Entity const &entity) {
+    auto const Entityid = entity.get_id();
+    auto const Entitysignatures = m_signatures[Entityid];
 
     for (auto &[index, system]: m_systems) {
         auto const &system_component_signature = system->get_signature();
-        if (bool is_interest = (entity_signatures & system_component_signature) == system_component_signature;
+        if (bool is_interest = (Entitysignatures & system_component_signature) == system_component_signature;
             is_interest) {
             system->add_entity(entity);
         }
     }
 }
-void ecs::Registry::remove_entity_from_system(Entity entity) {
+void ecs::Registry::remove_Entityfrom_system(Entity entity) {
     for (auto [_, system]: m_systems) {
         system->remove_entity(entity);
     }
 }
 void ecs::Registry::update() {
     for (auto entity: m_to_be_added_entities) {
-        add_entity_to_system(entity);
+        add_Entityto_system(entity);
     }
     m_to_be_added_entities.clear();
 
     for (auto entity: m_to_be_removed_entities) {
-        remove_entity_from_system(entity);
+        remove_Entityfrom_system(entity);
         m_signatures[entity.get_id()].reset();
 
         // remove the entity from the component pools
@@ -124,7 +124,7 @@ void ecs::Registry::update() {
 }
 void ecs::Registry::add_tag(Entity entity, std::string const &tag) {
     m_tag_per_entity.insert({entity.get_id(), tag});
-    m_entity_per_tag.insert({tag, entity});
+    m_Entityper_tag.insert({tag, entity});
 }
 bool ecs::Registry::has_tag(Entity entity, std::string const &tag) const {
     if (!m_tag_per_entity.contains(entity.get_id())) {
@@ -132,16 +132,16 @@ bool ecs::Registry::has_tag(Entity entity, std::string const &tag) const {
     }
     return m_tag_per_entity.find(entity.get_id())->second == tag;
 }
-ecs::Entity ecs::Registry::get_entity(std::string const &tag) const { return m_entity_per_tag.at(tag); }
+ecs::Entity ecs::Registry::get_entity(std::string const &tag) const { return m_Entityper_tag.at(tag); }
 void ecs::Registry::remove_tag(Entity entity) {
     if (auto itr = m_tag_per_entity.find(entity.get_id()); itr != m_tag_per_entity.end()) {
-        m_entity_per_tag.erase(itr->second);
+        m_Entityper_tag.erase(itr->second);
         m_tag_per_entity.erase(itr);
     }
 }
 void ecs::Registry::add_to_group(Entity entity, std::string const &group) {
-    m_entity_groups.insert({group, std::set<Entity>{}});
-    m_entity_groups[group].insert(entity);
+    m_Entitygroups.insert({group, std::set<Entity>{}});
+    m_Entitygroups[group].insert(entity);
     m_groupe_per_entity.insert({entity.get_id(), group});
 }
 bool ecs::Registry::has_group(Entity entity, std::string const &group) const {
@@ -151,14 +151,14 @@ bool ecs::Registry::has_group(Entity entity, std::string const &group) const {
     return false;
 }
 std::vector<ecs::Entity> ecs::Registry::get_entities_from_group(std::string const &group) const {
-    auto const group_set = m_entity_groups.at(group);
+    auto const group_set = m_Entitygroups.at(group);
     return std::vector<Entity>{group_set.cbegin(), group_set.cend()};
 }
 void ecs::Registry::remove_from_group(Entity entity) {
     if (auto group_tag = m_groupe_per_entity.find(entity.get_id()); group_tag != m_groupe_per_entity.end()) {
-        if (auto group = m_entity_groups.find(group_tag->second); group != m_entity_groups.end()) {
-            if (auto entity_in_group = group->second.find(entity); entity_in_group != group->second.end()) {
-                group->second.erase(entity_in_group);
+        if (auto group = m_Entitygroups.find(group_tag->second); group != m_Entitygroups.end()) {
+            if (auto Entityin_group = group->second.find(entity); Entityin_group != group->second.end()) {
+                group->second.erase(Entityin_group);
                 m_groupe_per_entity.erase(group_tag);
             }
         }

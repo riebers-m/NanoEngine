@@ -44,6 +44,12 @@ CPMAddPackage(
         VERSION 0.7.3
 )
 
+CPMAddPackage(
+        NAME entt
+        GITHUB_REPOSITORY skypjack/entt
+        VERSION 3.14.0
+)
+
 set(IMGUI_SRC
         libs/imgui-1913/imconfig.h
         libs/imgui-1913/imgui.cpp
@@ -135,6 +141,8 @@ add_executable(custom_game_engine
         src/components/Script.hpp
         src/systems/Script.cpp
         src/systems/Script.hpp
+        src/ECS/Ecs_.cpp
+        src/ECS/Ecs_.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer
@@ -143,6 +151,7 @@ target_link_libraries(custom_game_engine
         glm::glm
         spdlog::spdlog_header_only
         cpptrace::cpptrace
+        EnTT::EnTT
 )
 target_include_directories(custom_game_engine PRIVATE libs/imgui-1913 libs/imgui-1913/backends src)
 

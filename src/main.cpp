@@ -29,10 +29,5 @@ int main(int argc, char *argv[]) {
         logger->error(e.what());
         return 1;
     }
-    CPPTRACE_CATCH_ALT(sol::error const &e) {
-        cpptrace::from_current_exception().print();
-        logger->error(e.what());
-        return 2;
-    }
     return 0;
 }
