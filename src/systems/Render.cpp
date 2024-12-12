@@ -6,14 +6,17 @@
 
 #include <SDL.h>
 
+#include <utility>
+
 #include "assetStore/AssetStore.hpp"
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 #include "glm/ext/scalar_reciprocal.hpp"
 
-systems::RenderSystem::RenderSystem(Logger logger) : m_logger{logger} {
-    require_component<component::Transform>();
-    require_component<component::Sprite>();
+systems::RenderSystem::RenderSystem(ecs::registry registry, Logger logger) :
+    System{std::move(registry)}, m_logger{std::move(logger)} {
+    // require_component<component::Transform>();
+    // require_component<component::Sprite>();
 }
 
 void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore const *asset_store,
@@ -24,9 +27,13 @@ void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore co
             component::Sprite sprite;
         };
         std::vector<RenderableEntity> renderables;
-        for (auto const entity: get_entities()) {
-            auto const transform = entity.get_component<component::Transform>();
-            auto const sprite = entity.get_component<component::Sprite>();
+
+        auto const view = m_registry->view<component::Transform, component::Sprite>();
+        // for (auto const entity: get_entities()) {
+        for (auto entity_id: view) {
+            auto const [transform, sprite] = m_registry->get<component::Transform, component::Sprite>(entity_id);
+            // auto const transform = entity.get_component<component::Transform>();
+            // auto const sprite = entity.get_component<component::Sprite>();
 
             // bypass rendering entities if they are outside the camera view
             bool const is_entity_outside_camera_view =

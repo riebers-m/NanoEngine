@@ -17,7 +17,7 @@
 using namespace std::chrono_literals;
 
 namespace systems {
-    RenderGUI::RenderGUI(Logger logger) : m_logger{logger} {}
+    RenderGUI::RenderGUI(ecs::registry registry,Logger logger) : System{std::move(registry)}, m_logger{std::move(logger)} {}
     void RenderGUI::update(ecs::Registry *registry, SDL_Rect const &camera) {
         auto constexpr window_flags = ImGuiWindowFlags_AlwaysAutoResize;
         if (ImGui::Begin("Spawn Enemies", nullptr, window_flags)) {

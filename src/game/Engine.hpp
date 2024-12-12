@@ -8,7 +8,6 @@
 #include "game/Game.hpp"
 
 namespace engine {
-    // using Logger = std::shared_ptr<spdlog::logger>;
     class Engine {
     private:
         Engine();

@@ -20,7 +20,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit KeyboardMovement(Logger logger);
+        explicit KeyboardMovement(ecs::registry registry,Logger logger);
 
         void subscribe_to_event(events::EventBus *);
         void on_movement(events::KeyPressedEvent &event);

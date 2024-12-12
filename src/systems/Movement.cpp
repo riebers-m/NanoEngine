@@ -1,6 +1,8 @@
 //
 // Created by HP on 20.10.2024.
 //
+#include <utility>
+
 #include "systems/Movement.hpp"
 
 #include "components/RigidBody.hpp"
@@ -10,9 +12,10 @@
 class Logger;
 namespace systems {
 
-    Movement::Movement(Logger logger) : m_logger{logger} {
-        require_component<component::Transform>();
-        require_component<component::RigidBody>();
+    Movement::Movement(ecs::registry registry, Logger logger) :
+        System{std::move(registry)}, m_logger{std::move(logger)} {
+        // require_component<component::Transform>();
+        // require_component<component::RigidBody>();
     }
 
     void Movement::subscribe_to_event(events::EventBus *event_bus) {
@@ -31,7 +34,6 @@ namespace systems {
         }
     }
     void Movement::on_enemy_hit_obstacle(ecs::Entity enemy, ecs::Entity obstacle) {
-        m_logger->debug("Enemy hit obstacle");
         if (enemy.has_component<component::RigidBody>() && enemy.has_component<component::Sprite>()) {
             auto &rigid_body = enemy.get_component<component::RigidBody>();
             auto &sprite = enemy.get_component<component::Sprite>();
@@ -48,15 +50,20 @@ namespace systems {
     }
 
 
-    void Movement::update(float dt, std::uint16_t map_width, std::uint16_t map_height) {
+    void Movement::update(float dt, std::uint16_t map_width, std::uint16_t map_height, ecs::Registry *registry) {
         try {
-            for (auto entity: get_entities()) {
-                auto &transform = entity.get_component<component::Transform>();
-                auto const rigid_body = entity.get_component<component::RigidBody>();
-                auto const sprite = entity.get_component<component::Sprite>();
+            auto const view = m_registry->view<component::Transform, component::RigidBody, component::Sprite>();
+            // for (auto entity: get_entities()) {
+            for (auto entity_id: view) {
+                // auto &transform = entity.get_component<component::Transform>();
+                // auto const rigid_body = entity.get_component<component::RigidBody>();
+                // auto const sprite = entity.get_component<component::Sprite>();
+                auto &transform = m_registry->get<component::Transform>(entity_id);
+                auto const [rigid_body, sprite] = m_registry->get<component::RigidBody, component::Sprite>(entity_id);
 
                 bool const is_outside_map = (transform.position.x < 0 || transform.position.x > map_width ||
                                              transform.position.y < 0 || transform.position.y > map_height);
+                auto entity = ecs::Entity{entity_id, registry};
                 if (is_outside_map && !entity.has_tag("player")) {
                     entity.kill();
                     continue;

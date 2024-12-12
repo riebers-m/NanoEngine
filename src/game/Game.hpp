@@ -26,7 +26,6 @@ namespace engine {
     class AssetStore;
 
     class Game {
-        // using Logger = std::shared_ptr<spdlog::logger>;
         using Logger = std::shared_ptr<Logger>;
 
     private:

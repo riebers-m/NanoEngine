@@ -17,10 +17,10 @@ namespace systems {
 
     private:
         Logger m_logger;
-        ecs::Registry *m_registry;
+        ecs::Registry *m_main_registry;
 
     public:
-        explicit ProjectileEmitter(Logger logger, ecs::Registry *);
+        explicit ProjectileEmitter(ecs::registry registry, Logger logger, ecs::Registry *);
 
         void update();
         void subscribe_to_event(events::EventBus *);

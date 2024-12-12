@@ -16,12 +16,12 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit Movement(Logger);
+        explicit Movement(ecs::registry registry,Logger);
 
         void subscribe_to_event(events::EventBus *event_bus);
         void on_collision(events::Collision &event);
         void on_enemy_hit_obstacle(ecs::Entity enemy, ecs::Entity obstacle);
-        void update(float dt, std::uint16_t map_width, std::uint16_t map_height);
+        void update(float dt, std::uint16_t map_width, std::uint16_t map_height, ecs::Registry* registry);
     };
 } // namespace systems
 #endif // MOVEMENT_HPP

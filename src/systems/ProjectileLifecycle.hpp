@@ -1,9 +1,10 @@
 //
 // Created by HP on 08.11.2024.
 //
-
-#pragma once
 #include "ECS/ECS.hpp"
+#include "common/Logger.hpp"
+#pragma once
+
 
 namespace systems {
 
@@ -14,9 +15,9 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit ProjectileLifecycle(Logger logger);
+        explicit ProjectileLifecycle(ecs::registry registry, Logger logger);
 
-        void update();
+        void update(ecs::Registry *);
     };
 
 } // namespace systems

@@ -76,8 +76,8 @@ add_executable(custom_game_engine
         src/timer/Timer.hpp
         src/components/Transform.hpp
         src/systems/Movement.hpp
-        src/ECS/ECS.hpp
-        src/ECS/ECS.cpp
+        #        src/ECS/_ECS.hpp
+        #        src/ECS/_ECS.cpp
         src/components/RigidBody.hpp
         src/systems/Movement.cpp
         src/systems/Render.cpp
@@ -141,8 +141,8 @@ add_executable(custom_game_engine
         src/components/Script.hpp
         src/systems/Script.cpp
         src/systems/Script.hpp
-        src/ECS/Ecs_.cpp
-        src/ECS/Ecs_.hpp
+        src/ECS/ECS.cpp
+        src/ECS/ECS.hpp
 )
 target_link_libraries(custom_game_engine
         SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer

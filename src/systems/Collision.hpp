@@ -18,8 +18,8 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit Collision(Logger logger);
-        void update(events::EventBus *);
+        explicit Collision(ecs::registry registry, Logger logger);
+        void update(events::EventBus *, ecs::Registry *);
     };
 
 } // namespace systems

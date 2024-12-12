@@ -18,7 +18,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit CameraMovement(Logger logger);
+        explicit CameraMovement(ecs::registry registry, Logger logger);
 
         void update(SDL_Rect &camera, engine::Configuration const &config);
     };

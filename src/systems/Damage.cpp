@@ -10,7 +10,9 @@
 #include "eventBus/EventBus.hpp"
 
 namespace systems {
-    Damage::Damage(Logger logger) : m_logger{logger} { require_component<component::BoxCollider>(); }
+    Damage::Damage(ecs::registry registry, Logger logger) :
+        System{std::move(registry)}, m_logger{std::move(logger)} { /*require_component<component::BoxCollider>();*/
+    }
     void Damage::subscribe_to_event(events::EventBus *event_bus) {
         event_bus->subscribe<events::Collision>([this](events::Collision &event) { on_collision(event); });
     }

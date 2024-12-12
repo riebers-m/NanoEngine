@@ -6,7 +6,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <format>
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include <utility>
 
 namespace engine {
     Engine::Engine() {
@@ -53,6 +53,6 @@ namespace engine {
         //     SDL_GetError()));
         // }
 
-        return Game{window, renderer, logger, config};
+        return Game{window, renderer, std::move(logger), config};
     }
 } // namespace engine

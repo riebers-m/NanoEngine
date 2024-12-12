@@ -155,13 +155,14 @@ namespace engine {
         m_registry->get_system<systems::Movement>().subscribe_to_event(m_event_bus.get());
 
         m_registry->update();
-        m_registry->get_system<systems::Movement>().update(dt, m_config.map_width, m_config.map_height);
+        m_registry->get_system<systems::Movement>().update(dt, m_config.map_width, m_config.map_height,
+                                                           m_registry.get());
         m_registry->get_system<systems::ProjectileEmitter>().update();
-        m_registry->get_system<systems::Collision>().update(m_event_bus.get());
+        m_registry->get_system<systems::Collision>().update(m_event_bus.get(), m_registry.get());
         m_registry->get_system<systems::Animation>().update(dt);
         m_registry->get_system<systems::CameraMovement>().update(m_camera, m_config);
-        m_registry->get_system<systems::ProjectileLifecycle>().update();
-        m_registry->get_system<systems::Script>().update(dt, elapsed_time.round());
+        m_registry->get_system<systems::ProjectileLifecycle>().update(m_registry.get());
+        m_registry->get_system<systems::Script>().update(dt, elapsed_time.round(), m_registry.get());
     }
     void Game::render() const {
         SDL_SetRenderDrawColor(m_renderer.get(), 21, 21, 21, 255);

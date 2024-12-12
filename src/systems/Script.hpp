@@ -69,9 +69,9 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit Script(Logger logger);
+        explicit Script(ecs::registry registry, Logger logger);
 
-        void update(float dt, std::chrono::milliseconds const &elapsed_time) const;
+        void update(float dt, std::chrono::milliseconds const &elapsed_time, ecs::Registry *) const;
         void create_lua_bindigs(sol::state &lua);
     };
 

@@ -22,7 +22,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit RenderSystem(Logger);
+        explicit RenderSystem(ecs::registry registry, Logger);
         void update(SDL_Renderer *, engine::AssetStore const *asset_store, SDL_Rect const &camera) const;
     };
 } // namespace systems

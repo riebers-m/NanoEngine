@@ -15,7 +15,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit Animation(Logger logger);
+        explicit Animation(ecs::registry registry, Logger logger);
 
         void update(float);
     };

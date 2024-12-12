@@ -3,24 +3,27 @@
 //
 
 #include "Animation.hpp"
+
+#include <utility>
 #include "components/Animation.hpp"
 
 #include "components/Sprite.hpp"
 
 namespace systems {
-    Animation::Animation(Logger logger) : m_logger(logger) {
-        require_component<component::Sprite>();
-        require_component<component::Animation>();
-    }
+    Animation::Animation(ecs::registry registry, Logger logger) :
+        System{std::move(registry)}, m_logger(std::move(logger)) {}
 
     // TODO
     // Identifying animations by name
     // E.g. to have 3 frames for up_animation, 3 for down_animations, etc.
     void Animation::update(float dt) {
-        for (auto entity: get_entities()) {
-            auto &animation = entity.get_component<component::Animation>();
-            auto &sprite = entity.get_component<component::Sprite>();
+        auto view = m_registry->view<component::Animation, component::Sprite>();
+        for (auto entity: view) {
+            // for (auto entity: get_entities()) {
+            // auto &animation = entity.get_component<component::Animation>();
+            // auto &sprite = entity.get_component<component::Sprite>();
 
+            auto [animation, sprite] = view.get<component::Animation, component::Sprite>(entity);
             animation.elapsed_time += dt;
 
             animation.current_frame =

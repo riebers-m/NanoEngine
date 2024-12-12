@@ -23,7 +23,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit HealthBar(Logger logger);
+        explicit HealthBar(ecs::registry registry,Logger logger);
 
         void update(SDL_Renderer *, engine::AssetStore *, SDL_Rect const &camera);
     };

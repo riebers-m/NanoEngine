@@ -7,11 +7,16 @@
 #include "assetStore/AssetStore.hpp"
 #include "components/TextLabel.hpp"
 
-systems::RenderText::RenderText(Logger logger) : m_logger{logger} { require_component<component::TextLabel>(); }
+systems::RenderText::RenderText(ecs::registry registry, Logger logger) :
+    System{std::move(registry)}, m_logger{std::move(logger)} { /* require_component<component::TextLabel>(); */
+}
 
 void systems::RenderText::update(SDL_Renderer *renderer, engine::AssetStore *asset_store, SDL_Rect const &camera) {
-    for (auto entity: get_entities()) {
-        auto const text_label = entity.get_component<component::TextLabel>();
+    auto const view = m_registry->view<component::TextLabel>();
+    // for (auto entity: get_entities()) {
+    for (auto entity_id: view) {
+        // auto const text_label = entity.get_component<component::TextLabel>();
+        auto const text_label = m_registry->get<component::TextLabel>(entity_id);
 
         if (std::unique_ptr<SDL_Surface, std::function<void(SDL_Surface * s)>> surface{
                     TTF_RenderText_Blended(asset_store->get_font(text_label.asset_id), text_label.text.c_str(),
@@ -27,8 +32,7 @@ void systems::RenderText::update(SDL_Renderer *renderer, engine::AssetStore *ass
                 int label_height = 0;
 
                 if (SDL_QueryTexture(texture.get(), nullptr, nullptr, &label_width, &label_height) != 0) {
-                    // TODO
-                    // m_logger->error("query texture {} failed: {}", text_label.asset_id, SDL_GetError());
+                    m_logger->error("Query texture {} failed: {}", text_label.asset_id, SDL_GetError());
                     return;
                 }
 

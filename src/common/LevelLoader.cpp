@@ -151,7 +151,8 @@ namespace engine {
                             glm::vec2{scale["x"].get_or<float>(1.0), scale["y"].get_or<float>(1.0)},
                             transform["rotation"].get_or<float>(0.0));
 
-                    m_logger->debug("Added transform component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added transform component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_rigidbody = components["rigidbody"];
@@ -160,7 +161,8 @@ namespace engine {
                     sol::table const velocity = rigidbody["velocity"];
                     new_entity.add_component<component::RigidBody>(
                             glm::vec2{velocity["x"].get_or<float>(0.0), velocity["y"].get_or<float>(0.0)});
-                    m_logger->debug("Added rigidbody component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added rigidbody component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
                 if (sol::optional<sol::table> const has_sprite = components["sprite"]; has_sprite != sol::nullopt) {
                     sol::table const sprite = components["sprite"];
@@ -173,7 +175,8 @@ namespace engine {
                             sprite["src_rect_x"].get_or<int>(0.0), sprite["src_rect_y"].get_or<int>(0.0));
 
 
-                    m_logger->debug("Added sprite component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added sprite component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_animation = components["animation"];
@@ -183,7 +186,8 @@ namespace engine {
                     new_entity.add_component<component::Animation>(animation["num_frames"].get_or<int>(1.0),
                                                                    animation["speed_rate"].get_or<int>(1.0));
 
-                    m_logger->debug("Added animation component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added animation component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_boxcollider = components["boxcollider"];
@@ -195,7 +199,8 @@ namespace engine {
                             glm::vec2{boxcollider["offset"]["x"].get_or<float>(0.0),
                                       boxcollider["offset"]["y"].get_or<float>(0.0)});
 
-                    m_logger->debug("Added boxcollider component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added boxcollider component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_health = components["health"]; has_health != sol::nullopt) {
@@ -203,7 +208,8 @@ namespace engine {
 
                     new_entity.add_component<component::Health>(health["health_percentage"].get_or<int>(100.0));
 
-                    m_logger->debug("Added health component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added health component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_projectile_emitter = components["projectile_emitter"];
@@ -221,7 +227,8 @@ namespace engine {
                             component::ProjectileEmitter::string_to_repeater(
                                     projectile_emitter["repeater"].get_or<std::string>("automatic")));
 
-                    m_logger->debug("Added projectile_emitter component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added projectile_emitter component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
                 if (sol::optional<sol::table> const has_keyboard_controller = components["keyboard_controller"];
                     has_keyboard_controller != sol::nullopt) {
@@ -239,7 +246,8 @@ namespace engine {
 
                     );
 
-                    m_logger->debug("Added keyboard_controller component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added keyboard_controller component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_camera_follow = components["camera_follow"];
@@ -248,7 +256,8 @@ namespace engine {
 
                     new_entity.add_component<component::CameraFollow>();
 
-                    m_logger->debug("Added camera_follow component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added camera_follow component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<sol::table> const has_script = components["on_update_script"];
@@ -256,17 +265,18 @@ namespace engine {
                     sol::function const func = components["on_update_script"][0];
 
                     new_entity.add_component<component::Script>(func);
-                    m_logger->debug("Added script component to entity {}", new_entity.get_id());
+                    m_logger->debug("Added script component to entity {}",
+                                    static_cast<std::uint32_t>(new_entity.get_id()));
                 }
 
                 if (sol::optional<std::string> const has_tag = entity["tag"]; has_tag != sol::nullopt) {
                     new_entity.tag(entity["tag"].get<std::string>());
-                    m_logger->debug("Added entity {} with tag {}", new_entity.get_id(),
+                    m_logger->debug("Added entity {} with tag {}", static_cast<std::uint32_t>(new_entity.get_id()),
                                     entity["tag"].get<std::string>());
                 }
                 if (sol::optional<std::string> const has_group = entity["group"]; has_group != sol::nullopt) {
                     new_entity.group(entity["group"].get<std::string>());
-                    m_logger->debug("Added entity {} with group {}", new_entity.get_id(),
+                    m_logger->debug("Added entity {} with group {}", static_cast<std::uint32_t>(new_entity.get_id()),
                                     entity["group"].get<std::string>());
                 }
 

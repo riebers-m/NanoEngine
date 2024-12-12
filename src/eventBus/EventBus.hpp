@@ -4,11 +4,11 @@
 
 #ifndef EVENTBUS_HPP
 #define EVENTBUS_HPP
+#include <functional>
 #include <typeindex>
 
 #include "Event.hpp"
 #include "common/Logger.hpp"
-#include "spdlog/spdlog.h"
 
 namespace events {
     class IEventCallback {

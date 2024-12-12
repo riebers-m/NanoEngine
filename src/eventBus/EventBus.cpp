@@ -4,6 +4,8 @@
 
 #include "EventBus.hpp"
 
+#include <utility>
+
 namespace events {
-    EventBus::EventBus(Logger logger) : m_logger{logger} {}
+    EventBus::EventBus(Logger logger) : m_logger{std::move(logger)} {}
 } // namespace events

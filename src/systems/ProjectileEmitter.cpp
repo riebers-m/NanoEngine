@@ -14,15 +14,19 @@
 #include "eventBus/EventBus.hpp"
 
 namespace systems {
-    ProjectileEmitter::ProjectileEmitter(Logger logger, ecs::Registry *registry) :
-        m_logger{logger}, m_registry{registry} {
-        require_component<component::ProjectileEmitter>();
-        require_component<component::Transform>();
+    ProjectileEmitter::ProjectileEmitter(ecs::registry registry, Logger logger, ecs::Registry *main_registry) :
+        System{std::move(registry)}, m_logger{std::move(logger)}, m_main_registry{main_registry} {
+        // require_component<component::ProjectileEmitter>();
+        // require_component<component::Transform>();
     }
     void ProjectileEmitter::update() {
-        for (auto const entity: get_entities()) {
-            auto &projectile_emitter = entity.get_component<component::ProjectileEmitter>();
-            auto const transform = entity.get_component<component::Transform>();
+        auto const view = m_registry->view<component::ProjectileEmitter, component::Transform>();
+        // for (auto const entity: get_entities()) {
+        // auto &projectile_emitter = entity.get_component<component::ProjectileEmitter>();
+        // auto const transform = entity.get_component<component::Transform>();
+        for (auto entity_id: view) {
+            auto &projectile_emitter = m_registry->get<component::ProjectileEmitter>(entity_id);
+            auto const transform = m_registry->get<component::Transform>(entity_id);
 
             if (projectile_emitter.repeater == component::ProjectileEmitter::Repeater::manual) {
                 continue;
@@ -30,12 +34,14 @@ namespace systems {
             if (std::chrono::high_resolution_clock::now() - projectile_emitter.lastEmissionTime >
                 projectile_emitter.repeat_frequence) {
                 auto projectile_position = transform.position;
+                auto entity = ecs::Entity{entity_id, m_main_registry};
+
                 if (entity.has_component<component::Sprite>()) {
                     auto const sprite = entity.get_component<component::Sprite>();
                     projectile_position.x += (transform.scale.x * sprite.width / 2);
                     projectile_position.y += (transform.scale.y * sprite.height / 2);
                 }
-                auto projectile = m_registry->create_entity();
+                auto projectile = m_main_registry->create_entity();
                 projectile.group("projectiles");
                 projectile.add_component<component::Transform>(projectile_position, transform.scale,
                                                                transform.rotation);
@@ -54,7 +60,10 @@ namespace systems {
     }
     void ProjectileEmitter::on_keypress(events::KeyPressedEvent &event) {
         if (event.keycode == SDLK_SPACE) {
-            for (auto entity: get_entities()) {
+            // for (auto entity: get_entities()) {
+            auto const view = m_registry->view<component::ProjectileEmitter, component::Transform>();
+            for (auto entity_id: view) {
+                ecs::Entity entity{entity_id, m_main_registry};
                 if (entity.has_tag("player")) {
                     auto const projectile_emitter = entity.get_component<component::ProjectileEmitter>();
                     auto const transform = entity.get_component<component::Transform>();
@@ -66,7 +75,7 @@ namespace systems {
                         projectile_position.x += (transform.scale.x * sprite.width / 2);
                         projectile_position.y += (transform.scale.y * sprite.height / 2);
                     }
-                    auto projectile = m_registry->create_entity();
+                    auto projectile = m_main_registry->create_entity();
                     projectile.group("projectiles");
                     projectile.add_component<component::Transform>(projectile_position, transform.scale,
                                                                    transform.rotation);

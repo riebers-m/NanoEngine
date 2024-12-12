@@ -20,7 +20,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit Damage(Logger logger);
+        explicit Damage(ecs::registry registry, Logger logger);
 
         void subscribe_to_event(events::EventBus *);
         void on_collision(events::Collision &event);

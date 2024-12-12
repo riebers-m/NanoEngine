@@ -18,7 +18,7 @@ namespace systems {
         Logger m_logger;
 
     public:
-        explicit RenderGUI(Logger logger);
+        explicit RenderGUI(ecs::registry registry, Logger logger);
 
         void update(ecs::Registry *registry, SDL_Rect const &camera);
     };

@@ -7,10 +7,18 @@
 
 #include <sol/state.hpp>
 
-systems::Script::Script(Logger logger) : m_logger{std::move(logger)} { require_component<component::Script>(); }
-void systems::Script::update(float dt, std::chrono::milliseconds const &elapsed_time) const {
-    for (auto entity: get_entities()) {
-        auto const script = entity.get_component<component::Script>();
+systems::Script::Script(ecs::registry registry, Logger logger) :
+    System{std::move(registry)}, m_logger{std::move(logger)} {
+    // require_component<component::Script>();
+}
+void systems::Script::update(float dt, std::chrono::milliseconds const &elapsed_time, ecs::Registry *registry) const {
+    auto const view = m_registry->view<component::Script>();
+
+    // for (auto entity: get_entities()) {
+    for (auto entity_id: view) {
+        // auto const script = entity.get_component<component::Script>();
+        auto const script = m_registry->get<component::Script>(entity_id);
+        ecs::Entity entity{entity_id, registry};
         script.func(entity, dt, static_cast<std::uint32_t>(elapsed_time.count()));
     }
 }

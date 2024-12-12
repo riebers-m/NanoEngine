@@ -12,15 +12,19 @@
 #include "components/Sprite.hpp"
 #include "components/Transform.hpp"
 
-systems::HealthBar::HealthBar(Logger logger) : m_logger{logger} {
-    require_component<component::Health>();
-    require_component<component::Transform>();
-    require_component<component::Sprite>();
+systems::HealthBar::HealthBar(ecs::registry registry, Logger logger) :
+    System{std::move(registry)}, m_logger{std::move(logger)} {
+    // require_component<component::Health>();
+    // require_component<component::Transform>();
+    // require_component<component::Sprite>();
 }
 void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asset_store, SDL_Rect const &camera) {
-    for (auto entity: get_entities()) {
-        auto const health = entity.get_component<component::Health>();
-        auto const transform = entity.get_component<component::Transform>();
+    auto const view = m_registry->view<component::Health, component::Transform, component::Sprite>();
+    // for (auto entity: get_entities()) {
+    // auto const health = entity.get_component<component::Health>();
+    // auto const transform = entity.get_component<component::Transform>();
+    for (auto entity: view) {
+        auto const [health, transform] = m_registry->get<component::Health, component::Transform>(entity);
 
         SDL_Color color{0, 255, 0};
         if (health.health_percentage <= 30) {
@@ -46,7 +50,8 @@ void systems::HealthBar::update(SDL_Renderer *renderer, engine::AssetStore *asse
                     m_logger->error("query texture failed: {}", SDL_GetError());
                     return;
                 }
-                auto const sprite = entity.get_component<component::Sprite>();
+                // auto const sprite = entity.get_component<component::Sprite>();
+                auto const sprite = m_registry->get<component::Sprite>(entity);
                 SDL_Rect dest = {static_cast<int>(transform.position.x - camera.x + sprite.width / 2),
                                  static_cast<int>(transform.position.y - camera.y - 24), label_width, label_height};
                 SDL_RenderCopy(renderer, texture.get(), nullptr, &dest);
