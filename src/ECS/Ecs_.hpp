@@ -11,6 +11,7 @@
 
 namespace ecs {
     using entity_id = entt::entity;
+    using registry = std::shared_ptr<entt::registry>;
 
     class Entity_ {
     private:
@@ -31,13 +32,13 @@ namespace ecs {
         [[nodiscard]] bool has_tag(std::string const &tag) const;
         void group(std::string const &group);
         [[nodiscard]] bool has_group(std::string const &group) const;
-        void kill();
+        void kill() const;
         [[nodiscard]] entity_id get_id() const;
 
         template<typename T, typename... TArgs>
         void add_component(TArgs &&...);
         template<typename T>
-        void remove_component();
+        void remove_component() const;
         template<typename T>
         [[nodiscard]] bool has_component() const;
         template<typename T>
@@ -46,17 +47,29 @@ namespace ecs {
         T &get_component() const;
     };
 
+    class System_ {
+    private:
+        registry m_registry;
+
+    public:
+        using Entities = std::vector<Entity_>;
+
+        explicit System_(registry registry);
+
+        virtual ~System_() = default;
+    };
+
     class Registry_ {
-        // using Systems = std::unordered_map<std::type_index, std::shared_ptr<System>>;
+        using Systems = std::unordered_map<std::type_index, std::shared_ptr<System_>>;
         using Logger = std::shared_ptr<engine::Logger>;
         using Entities = std::set<entity_id>;
 
     private:
         // Map of active systems
         // [index = system typeid]
-        // Systems m_systems;
-        entt::registry m_registry;
+        registry m_registry;
         Logger m_logger;
+        Systems m_systems;
         // Entities to be added/removed when update is called
         Entities m_to_be_added_entities;
         Entities m_to_be_removed_entities;
@@ -107,27 +120,69 @@ namespace ecs {
 
     template<typename T, typename... TArgs>
     void Entity_::add_component(TArgs &&...args) {
-        // m_registry->add_component<T>(*this, std::forward<TArgs>(args)...);
+        m_registry->add_component<T>(*this, std::forward<TArgs>(args)...);
     }
     template<typename T>
-    void Entity_::remove_component() {
-        // m_kregistry->remove_component<T>(*this);
+    void Entity_::remove_component() const {
+        m_registry->remove_component<T>(*this);
     }
     template<typename T>
     bool Entity_::has_component() const {
-        return false;
-        // retkurn m_registry->has_component<T>(*this);
+        return m_registry->has_component<T>(*this);
     }
     template<typename T>
     T &Entity_::get_component() {
-        // return m_registry->get_component<T>(*this);
-        return T{};
+        return m_registry->get_component<T>(*this);
     }
 
     template<typename T>
     T &Entity_::get_component() const {
-        // rketurn m_registry->get_component<T>(*this);
-        return T{};
+        return m_registry->get_component<T>(*this);
+    }
+
+    ///// Registry
+    template<typename T, typename... TArgs>
+    void Registry_::add_component(Entity_ const &entity, TArgs &&...args) {
+        m_registry->emplace<T>(entity.get_id(), std::forward<TArgs>(args)...);
+    }
+    template<typename T>
+    void Registry_::remove_component(Entity_ const &entity) {
+        if (auto const removed = m_registry->remove<T>(entity.get_id()); removed == 0) {
+            m_logger->warn("Could not remove component {} from entity {}", typeid(T).name(), entity.get_id());
+        }
+    }
+    template<typename T>
+    bool Registry_::has_component(Entity_ entity) const {
+        return m_registry->all_of<T>(entity.get_id());
+    }
+    template<typename T>
+    T &Registry_::get_component(Entity_ const &entity) {
+        return m_registry->get<T>(entity.get_id());
+    }
+    template<typename T, typename... TArgs>
+    void Registry_::add_system(TArgs &&...args) {
+        auto new_system = std::make_shared<T>(std::forward<TArgs>(args)...);
+        auto const [pos, ok] = m_systems.insert(std::make_pair(std::type_index(typeid(T)), new_system));
+        if (!ok) {
+            throw std::runtime_error(std::format("Inserting system {} failed", typeid(T).name()));
+        }
+    }
+    template<typename T>
+    void Registry_::remove_system() {
+        if (auto to_remove = m_systems.find(std::type_index(typeid(T))); to_remove != m_systems.end()) {
+            m_systems.erase(to_remove);
+        }
+    }
+    template<typename T>
+    bool Registry_::has_system() const {
+        return m_systems.find(std::type_index(typeid(T)) != m_systems.cend());
+    }
+    template<typename T>
+    T &Registry_::get_system() const {
+        if (auto system = m_systems.find(std::type_index(typeid(T))); system != m_systems.end()) {
+            return std::static_pointer_cast<T>(system->second);
+        }
+        throw std::out_of_range(std::format("Invalid system {}", typeid(T).name()));
     }
 
 } // namespace ecs

@@ -10,21 +10,24 @@ namespace ecs {
     bool Entity_::operator!=(const Entity_ &other) const { return m_id != other.m_id; }
     bool Entity_::operator>(const Entity_ &other) const { return m_id > other.m_id; }
     bool Entity_::operator<(const Entity_ &other) const { return m_id < other.m_id; }
-    void Entity_::tag(std::string const &tag) {}
-    [[nodiscard]] bool Entity_::has_tag(std::string const &tag) const { return false; }
-    void Entity_::group(std::string const &group) {}
-    [[nodiscard]] bool Entity_::has_group(std::string const &group) const { return false; }
-    void Entity_::kill() { m_registry->remove_entity(*this); }
+    void Entity_::tag(std::string const &tag) { m_registry->add_tag(*this, tag); }
+    [[nodiscard]] bool Entity_::has_tag(std::string const &tag) const { return m_registry->has_tag(*this, tag); }
+    void Entity_::group(std::string const &group) { m_registry->add_to_group(*this, group); }
+    [[nodiscard]] bool Entity_::has_group(std::string const &group) const {
+        return m_registry->has_group(*this, group);
+    }
+    void Entity_::kill() const { m_registry->remove_entity(*this); }
     [[nodiscard]] entity_id Entity_::get_id() const { return m_id; }
 
+    System_::System_(registry registry) : m_registry{std::move(registry)} {}
 
-    Registry_::Registry_(Logger logger) : m_logger{std::move(logger)} {}
-    void Registry_::clear() { m_registry.clear(); }
-    Entity_ Registry_::create_entity() { return Entity_{m_registry.create(), this}; }
+    Registry_::Registry_(Logger logger) : m_registry{std::make_shared<entt::registry>()}, m_logger{std::move(logger)} {}
+    void Registry_::clear() { m_registry->clear(); }
+    Entity_ Registry_::create_entity() { return Entity_{m_registry->create(), this}; }
     void Registry_::remove_entity(Entity_ const &entity) { m_to_be_removed_entities.emplace(entity.get_id()); }
     void Registry_::update() {
         for (auto const entity_id: m_to_be_removed_entities) {
-            m_registry.destroy(entity_id);
+            m_registry->destroy(entity_id);
         }
         m_to_be_removed_entities.clear();
     }
