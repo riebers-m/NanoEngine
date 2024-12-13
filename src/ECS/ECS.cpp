@@ -24,8 +24,8 @@ namespace ecs {
     Entity Registry::create_entity() { return Entity{m_registry->create(), this}; }
     void Registry::remove_entity(Entity const &entity) { m_to_be_removed_entities.emplace(entity.get_id()); }
     void Registry::update() {
-        for (auto const Entityid: m_to_be_removed_entities) {
-            m_registry->destroy(Entityid);
+        for (auto const entity_id: m_to_be_removed_entities) {
+            m_registry->destroy(entity_id);
         }
         m_to_be_removed_entities.clear();
     }

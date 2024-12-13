@@ -18,20 +18,23 @@ namespace systems {
         // require_component<component::BoxCollider>();
     }
     void Collision::update(events::EventBus *event_bus, ecs::Registry *registry) {
-        auto const view = m_registry->view<component::Transform, component::BoxCollider>();
+        auto view = m_registry->view<component::Transform, component::BoxCollider>();
         // auto const entities = get_entities();
 
+        for (auto entity_id: view) {
+            auto const transform = m_registry->get<component::Transform>(entity_id);
+            m_logger->debug("pos: {},{}", transform.position.x, transform.position.y);
+        }
         // TODO: Exception occuring after refactoring with entt framework
         // to prevent double checks only check against entities infront of current entities in the vector
         for (auto itr = view.begin(); itr != view.end(); ++itr) {
-            auto entity_a = *itr;
+            auto const entity_a = *itr;
             auto const [transform_a, collider_a] =
                     m_registry->get<component::Transform, component::BoxCollider>(entity_a);
             // auto const transform_a = a.get_component<component::Transform>();
             // auto const collider_a = a.get_component<component::BoxCollider>();
-
-            for (auto j = ++itr; j != view.end(); ++j) {
-                auto entity_b = *j;
+            for (auto j = itr; j != view.end(); ++j) {
+                auto const entity_b = *j;
                 if (entity_a == entity_b) {
                     continue;
                 }
