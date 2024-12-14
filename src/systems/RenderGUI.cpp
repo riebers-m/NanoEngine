@@ -17,7 +17,8 @@
 using namespace std::chrono_literals;
 
 namespace systems {
-    RenderGUI::RenderGUI(ecs::registry registry,Logger logger) : System{std::move(registry)}, m_logger{std::move(logger)} {}
+    RenderGUI::RenderGUI(ecs::registry registry, Logger logger) :
+        System{std::move(registry)}, m_logger{std::move(logger)} {}
     void RenderGUI::update(ecs::Registry *registry, SDL_Rect const &camera) {
         auto constexpr window_flags = ImGuiWindowFlags_AlwaysAutoResize;
         if (ImGui::Begin("Spawn Enemies", nullptr, window_flags)) {
@@ -110,6 +111,8 @@ namespace systems {
         if (ImGui::Begin("Cursor position", nullptr, window_flags)) {
             ImGui::Text("x = %.1f, y = %.f", ImGui::GetIO().MousePos.x + camera.x,
                         ImGui::GetIO().MousePos.y + camera.y);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                        ImGui::GetIO().Framerate);
         }
         ImGui::End();
     }

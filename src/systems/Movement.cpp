@@ -13,17 +13,14 @@ class Logger;
 namespace systems {
 
     Movement::Movement(ecs::registry registry, Logger logger) :
-        System{std::move(registry)}, m_logger{std::move(logger)} {
-        // require_component<component::Transform>();
-        // require_component<component::RigidBody>();
-    }
+        System{std::move(registry)}, m_logger{std::move(logger)} {}
 
     void Movement::subscribe_to_event(events::EventBus *event_bus) {
         event_bus->subscribe<events::Collision>([this](events::Collision &event) { on_collision(event); });
     }
     void Movement::on_collision(events::Collision &event) {
-        ecs::Entity a = event.a;
-        ecs::Entity b = event.b;
+        ecs::Entity const a = event.a;
+        ecs::Entity const b = event.b;
 
         if (a.has_group("enemies") && b.has_group("obstacles")) {
             on_enemy_hit_obstacle(a, b);
@@ -53,11 +50,7 @@ namespace systems {
     void Movement::update(float dt, std::uint16_t map_width, std::uint16_t map_height, ecs::Registry *registry) {
         try {
             auto const view = m_registry->view<component::Transform, component::RigidBody, component::Sprite>();
-            // for (auto entity: get_entities()) {
             for (auto entity_id: view) {
-                // auto &transform = entity.get_component<component::Transform>();
-                // auto const rigid_body = entity.get_component<component::RigidBody>();
-                // auto const sprite = entity.get_component<component::Sprite>();
                 auto &transform = m_registry->get<component::Transform>(entity_id);
                 auto const [rigid_body, sprite] = m_registry->get<component::RigidBody, component::Sprite>(entity_id);
 

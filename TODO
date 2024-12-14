@@ -1,4 +1,6 @@
-[] Replace ECS with entt: https://github.com/skypjack/entt
+[x] Replace ECS with entt: https://github.com/skypjack/entt
+[] Create FPS debug window
+[] Add configurable keyboard user input
 [] Create seperate cmake for compile options
 [] Add Force system
 [] Check if engine compiles under Linux

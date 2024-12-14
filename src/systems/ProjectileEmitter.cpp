@@ -15,15 +15,9 @@
 
 namespace systems {
     ProjectileEmitter::ProjectileEmitter(ecs::registry registry, Logger logger, ecs::Registry *main_registry) :
-        System{std::move(registry)}, m_logger{std::move(logger)}, m_main_registry{main_registry} {
-        // require_component<component::ProjectileEmitter>();
-        // require_component<component::Transform>();
-    }
+        System{std::move(registry)}, m_logger{std::move(logger)}, m_main_registry{main_registry} {}
     void ProjectileEmitter::update() {
         auto const view = m_registry->view<component::ProjectileEmitter, component::Transform>();
-        // for (auto const entity: get_entities()) {
-        // auto &projectile_emitter = entity.get_component<component::ProjectileEmitter>();
-        // auto const transform = entity.get_component<component::Transform>();
         for (auto entity_id: view) {
             auto &projectile_emitter = m_registry->get<component::ProjectileEmitter>(entity_id);
             auto const transform = m_registry->get<component::Transform>(entity_id);

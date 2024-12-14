@@ -62,12 +62,37 @@ namespace engine {
         elapsed_time.start();
         setup();
 
+        std::chrono::nanoseconds constexpr timestep{16ms};
+        std::chrono::nanoseconds lag{0ns};
+        using clock = std::chrono::high_resolution_clock;
+
+        auto time_start = clock::now();
+
+
         while (m_is_running) {
-            auto const dt = variable_time();
-            // auto const dt = fixed_time();
+            auto current_time = clock::now();
+            auto frame_time = current_time - time_start;
+            time_start = current_time;
+            lag += std::chrono::duration_cast<std::chrono::nanoseconds>(frame_time);
+
             process_input();
-            update(dt);
+
+            // update game logic as lag permits
+            while (lag >= timestep) {
+                lag -= timestep;
+                auto constexpr duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timestep);
+                update(static_cast<float>(duration_ms.count()) / 1000);
+            }
+
+            // calculate how close or far we are from the next timestep
+            auto alpha = static_cast<float>(lag.count()) / timestep.count();
             render();
+
+            // auto const dt = variable_time();
+            // // auto const dt = fixed_time();
+            // process_input();
+            // update(dt);
+            // render();
         }
     }
 
@@ -76,9 +101,9 @@ namespace engine {
         imgui_context = ImGui::CreateContext();
         ImGui_ImplSDL2_InitForSDLRenderer(m_window.get(), m_renderer.get());
         ImGui_ImplSDLRenderer2_Init(m_renderer.get());
-
-        m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-
+        //
+        // m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
+        //
         m_registry->add_system<systems::Movement>(m_logger);
         m_registry->add_system<systems::RenderSystem>(m_logger);
         m_registry->add_system<systems::Animation>(m_logger);
@@ -102,7 +127,7 @@ namespace engine {
     }
 
     float Game::variable_time() {
-        if (auto time_to_wait = engine::MILL_SEC_PER_FRAME - m_timer.round();
+        if (auto const time_to_wait = engine::MILL_SEC_PER_FRAME - m_timer.round();
             time_to_wait > std::chrono::milliseconds(0) && time_to_wait <= engine::MILL_SEC_PER_FRAME) {
             std::this_thread::sleep_for(time_to_wait);
         }
@@ -135,9 +160,9 @@ namespace engine {
                     if (evnt.key.keysym.sym == SDLK_ESCAPE) {
                         m_is_running = false;
                     }
-                    if (evnt.key.keysym.sym == SDLK_F1) {
-                        debug_overlay = !debug_overlay;
-                    }
+                    // if (evnt.key.keysym.sym == SDLK_F1) {
+                    //     debug_overlay = !debug_overlay;
+                    // }
                     m_event_bus->emit<events::KeyPressedEvent>(evnt.key.keysym.sym);
                 default:
                     break;
@@ -147,13 +172,13 @@ namespace engine {
     void Game::update(float dt) {
         // reset all event handlers for the current frame
         m_event_bus->clear_subscribers();
-
-        // systems subscribe to events
+        //
+        // // systems subscribe to events
         m_registry->get_system<systems::Damage>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::ProjectileEmitter>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::KeyboardMovement>().subscribe_to_event(m_event_bus.get());
         m_registry->get_system<systems::Movement>().subscribe_to_event(m_event_bus.get());
-
+        //
         m_registry->update();
         m_registry->get_system<systems::Movement>().update(dt, m_config.map_width, m_config.map_height,
                                                            m_registry.get());
@@ -171,24 +196,24 @@ namespace engine {
         m_registry->get_system<systems::RenderSystem>().update(m_renderer.get(), m_asset_store.get(), m_camera);
         m_registry->get_system<systems::RenderText>().update(m_renderer.get(), m_asset_store.get(), m_camera);
         m_registry->get_system<systems::HealthBar>().update(m_renderer.get(), m_asset_store.get(), m_camera);
-#if _DEBUG
-        if (debug_overlay) {
-            m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
+        // // #if _DEBUG
+        // if (debug_overlay) {
+        //     m_registry->get_system<systems::RenderCollision>().update(m_renderer.get(), m_camera);
+        //
+        ImGui_ImplSDLRenderer2_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+        m_registry->get_system<systems::RenderGUI>().update(m_registry.get(), m_camera);
 
-            ImGui_ImplSDLRenderer2_NewFrame();
-            ImGui_ImplSDL2_NewFrame();
-            ImGui::NewFrame();
-            m_registry->get_system<systems::RenderGUI>().update(m_registry.get(), m_camera);
+        // Render Debug console
+        m_logger->draw("Log Console");
 
-            // Render Debug console
-            m_logger->draw("Log Console");
-
-            ImGui::Render();
-            ImGuiIO const &io = ImGui::GetIO();
-            SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
-        }
-#endif // _DEBUG
+        ImGui::Render();
+        ImGuiIO const &io = ImGui::GetIO();
+        SDL_RenderSetScale(m_renderer.get(), io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer.get());
+        // }
+        // // #endif // _DEBUG
         SDL_RenderPresent(m_renderer.get());
     }
 } // namespace engine

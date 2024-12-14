@@ -11,8 +11,9 @@
 namespace engine {
 #ifdef _DEBUG
     std::filesystem::path const ASSET_PATH(R"(C:\Users\HP\dev\custom_game_engine\assets)");
-#elif
-    std::string const ASSET_PATH = "./assets";
+#else
+    // std::string const ASSET_PATH = "./assets";
+    std::filesystem::path const ASSET_PATH(R"(C:\Users\HP\dev\custom_game_engine\assets)");
 #endif
 
     std::filesystem::path const FONTS_PATH = ASSET_PATH / "fonts";
@@ -32,14 +33,11 @@ namespace engine {
     std::filesystem::path const CHARRIOT_FONT = FONTS_PATH / "charriot.ttf";
 
 
-    std::chrono::milliseconds constexpr FPS = std::chrono::milliseconds(60);
+    std::chrono::milliseconds constexpr FPS = std::chrono::milliseconds(120);
     std::chrono::milliseconds constexpr MILL_SEC_PER_FRAME =
             std::chrono::milliseconds(std::chrono::milliseconds(1000) / FPS);
 
     std::size_t constexpr MAX_COMPONENTS = 32;
-    int constexpr TILE_SIZE = 32;
-    int constexpr JUNGLE_MAP_ROWS = 3;
-    int constexpr JUNGLE_MAP_COLS = 10;
 
 } // namespace engine
 

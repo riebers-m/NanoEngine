@@ -14,10 +14,7 @@
 #include "glm/ext/scalar_reciprocal.hpp"
 
 systems::RenderSystem::RenderSystem(ecs::registry registry, Logger logger) :
-    System{std::move(registry)}, m_logger{std::move(logger)} {
-    // require_component<component::Transform>();
-    // require_component<component::Sprite>();
-}
+    System{std::move(registry)}, m_logger{std::move(logger)} {}
 
 void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore const *asset_store,
                                    SDL_Rect const &camera) const {
@@ -26,14 +23,11 @@ void systems::RenderSystem::update(SDL_Renderer *renderer, engine::AssetStore co
             component::Transform transform;
             component::Sprite sprite;
         };
+        auto const view = m_registry->view<component::Transform, component::Sprite>();
         std::vector<RenderableEntity> renderables;
 
-        auto const view = m_registry->view<component::Transform, component::Sprite>();
-        // for (auto const entity: get_entities()) {
         for (auto entity_id: view) {
             auto const [transform, sprite] = m_registry->get<component::Transform, component::Sprite>(entity_id);
-            // auto const transform = entity.get_component<component::Transform>();
-            // auto const sprite = entity.get_component<component::Sprite>();
 
             // bypass rendering entities if they are outside the camera view
             bool const is_entity_outside_camera_view =

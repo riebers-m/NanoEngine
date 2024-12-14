@@ -12,24 +12,18 @@
 
 namespace systems {
     RenderCollision::RenderCollision(ecs::registry registry, Logger logger) :
-        System{std::move(registry)}, m_logger{std::move(logger)} {
-        // require_component<component::Transform>();
-        // require_component<component::BoxCollider>();
-    }
+        System{std::move(registry)}, m_logger{std::move(logger)} {}
 
     void RenderCollision::update(SDL_Renderer *renderer, SDL_Rect const &camera) {
         if (!renderer) {
             throw std::runtime_error(std::format("render collision error: invalid renderer"));
         }
-        // auto entities = get_entities();
+
         auto entities = m_registry->view<component::Transform, component::BoxCollider>();
 
         std::vector<ecs::Entityid> already_drawn;
-
         for (auto itr = entities.begin(); itr != entities.end(); ++itr) {
             auto const entity_a = *itr;
-            // auto const transform_a = a.get_component<component::Transform>();
-            // auto const collider_a = a.get_component<component::BoxCollider>();
             auto const [transform_a, collider_a] =
                     m_registry->get<component::Transform, component::BoxCollider>(entity_a);
 
@@ -49,8 +43,6 @@ namespace systems {
                 }
                 auto const [transform_b, collider_b] =
                         m_registry->get<component::Transform, component::BoxCollider>(entity_b);
-                // auto const transform_b = b.get_component<component::Transform>();
-                // auto const collider_b = b.get_component<component::BoxCollider>();
 
                 if (engine::Commons::AABB_collision_check(
                             transform_a.position.x + collider_a.offset.x, transform_a.position.y + collider_a.offset.y,

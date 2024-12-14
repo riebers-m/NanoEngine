@@ -43,7 +43,7 @@ namespace engine {
         if (window == nullptr) {
             throw std::runtime_error("could not create window.");
         }
-        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
         if (renderer == nullptr) {
             throw std::runtime_error("could not create renderer.");
         }
